@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Personal Finance Management",
+  title: "FinTrack",
   description: "Personal Finance Management Dashboard",
 };
 
