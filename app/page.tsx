@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import SignInForm from "../components/forms/SignInForm";
@@ -21,14 +21,18 @@ const Home = () => {
   };
 
   return (
-    <div className="text-white flex-center h-screen max-h-screen">
+    <div className="text-white flex-center h-screen max-h-screen mx-6">
       <div>
         <h1 className="text-2xl my-4">
-          {isSigningIn ? "Sign in to your personal finance dashboard" : "Sign up for a personal finance dashboard account"}
+          {isSigningIn
+            ? "Sign in to your personal finance dashboard"
+            : "Sign up for a personal finance dashboard account"}
         </h1>
 
         {signUpSuccess && !isSigningIn && (
-          <p className="text-green-400 mb-4">Sign up successful! Redirecting to sign in...</p>
+          <p className="text-green-400 mb-4">
+            Sign up successful! Redirecting to sign in...
+          </p>
         )}
 
         {isSigningIn ? (
@@ -37,13 +41,16 @@ const Home = () => {
           <SignUpForm onSignUpSuccess={handleSignUpSuccess} />
         )}
 
-        <button onClick={toggleForm} className="mt-4 text-blue-500 hover:underline">
-          {isSigningIn ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+        <button
+          onClick={toggleForm}
+          className="mt-4 text-blue-500 hover:underline"
+        >
+          {isSigningIn
+            ? "Don't have an account? Sign up"
+            : "Already have an account? Sign in"}
         </button>
 
-        <p className="copyright mt-4 py-4">
-          © 2024 FinTrack
-        </p>
+        <p className="copyright mt-4 py-4">© 2024 FinTrack</p>
       </div>
     </div>
   );
