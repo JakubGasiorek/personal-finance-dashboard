@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,8 +16,7 @@ import { Input } from "@/components/ui/input";
 import { RegistrationFormValidation } from "@/lib/validation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/services/firebase";
+import { signUpUser } from "@/services/user.actions";
 
 interface SignUpFormProps {
   onSignUpSuccess: () => void;
@@ -34,35 +32,51 @@ const SignUpForm = ({ onSignUpSuccess }: SignUpFormProps) => {
       email: "",
       password: "",
       confirmPassword: "",
+      name: "",
     },
   });
 
-  async function onSubmit({
-    email,
-    password,
-  }: z.infer<typeof RegistrationFormValidation>) {
+  async function onSubmit(data: z.infer<typeof RegistrationFormValidation>) {
     setIsLoading(true);
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
+    const { email, password, name } = data;
+
+    const result = await signUpUser({ email, password, name });
+
+    if (result.success) {
       onSignUpSuccess(); // Notify parent component of success
-    } catch (error) {
-      console.error(error);
+      router.push("/dashboard");
+    } else {
+      // Assuming error is always an instance of Error
+      const error = result.error as Error;
       form.setError("email", {
         type: "manual",
-        message: "Error creating account",
+        message: error.message || "Error creating account",
       });
       form.setError("password", {
         type: "manual",
-        message: "Error creating account",
+        message: error.message || "Error creating account",
       });
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl className="rounded-md border border-dark-500 bg-dark-400">
+                <Input placeholder="John Doe" {...field} />
+              </FormControl>
+              <FormMessage className="text-red-400" />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"
