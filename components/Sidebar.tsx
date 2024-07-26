@@ -21,33 +21,26 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, toggleSidebar, logout }) => {
       >
         X
       </button>
-      <ul className="p-4 space-y-2 mt-12">
+      <ul className="p-4 space-y-2 mt-12 text-white">
         <li>
-          <a href="/dashboard" className="text-white">
-            Dashboard
-          </a>
+          <a href="/dashboard">Dashboard</a>
         </li>
         <li>
-          <a href="/dashboard/expenses" className="text-white">
-            Expenses
-          </a>
+          <a href="/dashboard/expenses">Expenses</a>
         </li>
         <li>
-          <a href="/dashboard/income" className="text-white">
-            Income
-          </a>
+          <a href="/dashboard/income">Income</a>
         </li>
         <li>
-          <a href="/dashboard/settings" className="text-white">
-            Settings
-          </a>
+          <a href="/dashboard/settings">Settings</a>
         </li>
         <li>
-          <button onClick={logout} className="text-white">
-            Logout
-          </button>
+          <button onClick={logout}>Logout</button>
         </li>
       </ul>
+      <p className="absolute bottom-0 text-white p-4 copyright">
+        © 2024 FinTrack
+      </p>
     </div>
   );
 };
