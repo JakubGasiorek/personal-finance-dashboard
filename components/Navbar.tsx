@@ -10,7 +10,7 @@ const Navbar: FC<NavbarProps> = ({ toggleSidebar }) => {
   return (
     <nav className="flex-between p-4 bg-green-500">
       <h1 className="text-2xl font-bold">FinTrack</h1>
-      <button className="text-white" onClick={toggleSidebar}>
+      <button onClick={toggleSidebar}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6"
