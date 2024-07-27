@@ -22,3 +22,12 @@ export const UserFormValidation = z.object({
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
 });
+
+export const IncomeFormValidation = z.object({
+  source: z.string().nonempty("Source is required"),
+  amount: z.number().min(0, "Amount must be a positive number"),
+  date: z
+    .date()
+    .nullable()
+    .transform((val) => val || new Date()),
+});
