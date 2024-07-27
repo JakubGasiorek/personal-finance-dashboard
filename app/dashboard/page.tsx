@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { auth, db } from "@/services/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, getDocs, DocumentData } from "firebase/firestore";
 import { Bar, Pie } from "react-chartjs-2";
 import {
@@ -18,11 +18,20 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import IncomeForm from "@/components/forms/IncomeForm";
+
+// Define the interface for Income data
+interface Income {
+  id?: string; // Optional, since it will be added by Firestore
+  source: string;
+  amount: number;
+  date: any; // Timestamp type from Firebase
+}
 
 // Define FinancialData interface
 interface FinancialData {
   summary: DocumentData[];
-  income: DocumentData[];
+  income: Income[];
   expenses: DocumentData[];
 }
 
@@ -68,35 +77,45 @@ const Dashboard = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const fetchData = async (user: User) => {
+      try {
+        const userId = user.uid;
+        const summarySnapshot = await getDocs(
+          collection(db, `users/${userId}/summary`)
+        );
+        const incomeSnapshot = await getDocs(
+          collection(db, `users/${userId}/income`)
+        );
+        const expensesSnapshot = await getDocs(
+          collection(db, `users/${userId}/expenses`)
+        );
+
+        const summaryData = summarySnapshot.docs.map((doc) => doc.data());
+        const incomeData = incomeSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Income[];
+        const expensesData = expensesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setFinancialData({
+          summary: summaryData,
+          income: incomeData,
+          expenses: expensesData,
+        });
+      } catch (error) {
+        console.error("Error fetching financial data:", error);
+      }
+      setLoading(false); // User is authenticated, stop loading
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.push("/unauthorized"); // Redirect to unauthorized page if not authenticated
       } else {
-        try {
-          const userId = user.uid;
-          const summarySnapshot = await getDocs(
-            collection(db, `users/${userId}/summary`)
-          );
-          const incomeSnapshot = await getDocs(
-            collection(db, `users/${userId}/income`)
-          );
-          const expensesSnapshot = await getDocs(
-            collection(db, `users/${userId}/expenses`)
-          );
-
-          const summaryData = summarySnapshot.docs.map((doc) => doc.data());
-          const incomeData = incomeSnapshot.docs.map((doc) => doc.data());
-          const expensesData = expensesSnapshot.docs.map((doc) => doc.data());
-
-          setFinancialData({
-            summary: summaryData,
-            income: incomeData,
-            expenses: expensesData,
-          });
-        } catch (error) {
-          console.error("Error fetching financial data:", error);
-        }
-        setLoading(false); // User is authenticated, stop loading
+        fetchData(user);
       }
     });
 
@@ -114,6 +133,13 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  const handleIncomeAdded = (newIncome: Income) => {
+    setFinancialData((prevData) => ({
+      ...prevData,
+      income: [...prevData.income, newIncome],
+    }));
   };
 
   if (loading) {
@@ -140,14 +166,14 @@ const Dashboard = () => {
       const source = item.source || "Uncategorized";
       acc[source] = (acc[source] || 0) + item.amount;
       return acc;
-    }, {}) || {};
+    }, {} as Record<string, number>) || {};
 
   const expenseCategories =
     financialData?.expenses.reduce((acc, item) => {
       const category = item.category || "Uncategorized";
       acc[category] = (acc[category] || 0) + item.amount;
       return acc;
-    }, {}) || {};
+    }, {} as Record<string, number>) || {};
 
   const incomeChartData = {
     labels: Object.keys(incomeCategories),
@@ -184,11 +210,11 @@ const Dashboard = () => {
       />
       <div className="flex-1">
         <Navbar toggleSidebar={toggleSidebar} />
-        <div className="text-white mt-8 px-4">
+        <div className="text-white mt-8 px-4 mb-8">
           <h1 className="flex-center text-xl xl:text-3xl mb-8">
             Welcome to your dashboard
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Summary</h2>
               <div className="p-4 bg-dark-300 rounded-md">
@@ -200,6 +226,7 @@ const Dashboard = () => {
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Income</h2>
               <Bar data={incomeChartData} />
+              <IncomeForm onIncomeAdded={handleIncomeAdded} />
             </div>
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Expenses</h2>
