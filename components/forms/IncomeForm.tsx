@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { addDoc, collection } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { db, auth } from "@/services/firebase";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,22 +19,40 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IncomeFormValidation } from "@/lib/validation";
+import { Income } from "@/types";
 
 interface IncomeFormProps {
-  onIncomeAdded: (income: any) => void;
+  onIncomeAdded: (income: Income) => void;
+  incomeToEdit?: Income | null;
+  onEditCancel?: () => void;
+  onIncomeUpdated?: (income: Income) => void;
 }
 
-const IncomeForm = ({ onIncomeAdded }: IncomeFormProps) => {
+const IncomeForm = ({
+  onIncomeAdded,
+  incomeToEdit = null,
+  onEditCancel,
+  onIncomeUpdated,
+}: IncomeFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof IncomeFormValidation>>({
     resolver: zodResolver(IncomeFormValidation),
-    defaultValues: {
+    defaultValues: incomeToEdit || {
       source: "",
       amount: 0,
       date: new Date(),
     },
   });
+
+  useEffect(() => {
+    if (incomeToEdit) {
+      form.reset({
+        ...incomeToEdit,
+        date: incomeToEdit.date ? new Date(incomeToEdit.date) : new Date(),
+      });
+    }
+  }, [incomeToEdit]);
 
   const handleAddIncome = async (
     data: z.infer<typeof IncomeFormValidation>
@@ -42,25 +60,43 @@ const IncomeForm = ({ onIncomeAdded }: IncomeFormProps) => {
     if (auth.currentUser) {
       setIsLoading(true);
       try {
-        // Convert the amount to a number if it's a string
         const parsedData = {
           ...data,
           amount:
             typeof data.amount === "string"
               ? parseFloat(data.amount)
               : data.amount,
-          date: data.date || new Date(),
+          date: data.date ? new Date(data.date) : new Date(),
         };
 
         const userId = auth.currentUser.uid;
-        const docRef = await addDoc(
-          collection(db, `users/${userId}/income`),
-          parsedData
-        );
-        onIncomeAdded({ ...parsedData, id: docRef.id });
-        form.reset();
+
+        if (incomeToEdit && incomeToEdit.id) {
+          // Update existing income
+          const incomeDocRef = doc(
+            db,
+            `users/${userId}/income`,
+            incomeToEdit.id
+          );
+          await updateDoc(incomeDocRef, parsedData);
+          if (onIncomeUpdated) {
+            onIncomeUpdated({ ...parsedData, id: incomeToEdit.id });
+          }
+        } else {
+          // Add new income
+          const docRef = await addDoc(
+            collection(db, `users/${userId}/income`),
+            parsedData
+          );
+          onIncomeAdded({ ...parsedData, id: docRef.id });
+        }
+        form.reset({
+          source: "",
+          amount: 0,
+          date: new Date(),
+        });
       } catch (error) {
-        console.error("Error adding income:", error);
+        console.error("Error adding/updating income:", error);
       } finally {
         setIsLoading(false);
       }
@@ -130,13 +166,39 @@ const IncomeForm = ({ onIncomeAdded }: IncomeFormProps) => {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="bg-green-800 w-full"
-        >
-          {isLoading ? "Adding Income..." : "Add Income"}
-        </Button>
+        <div className="flex space-x-4">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-green-800 w-full"
+          >
+            {isLoading
+              ? incomeToEdit
+                ? "Updating Income..."
+                : "Adding Income..."
+              : incomeToEdit
+              ? "Update Income"
+              : "Add Income"}
+          </Button>
+          {incomeToEdit && (
+            <Button
+              type="button"
+              onClick={() => {
+                form.reset({
+                  source: "",
+                  amount: 0,
+                  date: new Date(),
+                });
+                if (onEditCancel) {
+                  onEditCancel();
+                }
+              }}
+              className="bg-red-800 w-full"
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
       </form>
     </Form>
   );

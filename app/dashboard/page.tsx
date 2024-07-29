@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
-import { auth, db } from "@/services/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
+import IncomeForm from "@/components/forms/IncomeForm";
+import useFinancialData from "@/hooks/useFinancialData";
 import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -18,43 +17,13 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import IncomeForm from "@/components/forms/IncomeForm";
-
-// Define the interface for Income data
-interface Income {
-  id?: string; // Optional, since it will be added by Firestore
-  source: string;
-  amount: number;
-  date: any; // Timestamp type from Firebase
-}
-
-// Define FinancialData interface
-interface FinancialData {
-  summary: DocumentData[];
-  income: Income[];
-  expenses: DocumentData[];
-}
-
-// Define a color map for categories
-const colors = [
-  "rgba(75, 192, 192, 0.6)", // teal
-  "rgba(153, 102, 255, 0.6)", // purple
-  "rgba(255, 159, 64, 0.6)", // orange
-  "rgba(255, 99, 132, 0.6)", // red
-  "rgba(54, 162, 235, 0.6)", // blue
-  "rgba(255, 206, 86, 0.6)", // yellow
-];
-
-const getColorForCategory = (
-  category: string,
-  colorMap: Record<string, string>
-) => {
-  if (!colorMap[category]) {
-    // Assign a new color from the color list
-    colorMap[category] = colors[Object.keys(colorMap).length % colors.length];
-  }
-  return colorMap[category];
-};
+import { FinancialData, Income } from "@/types";
+import { auth, db } from "@/services/firebase";
+import { deleteDoc, doc } from "firebase/firestore";
+import { getColorForCategory } from "@/lib/colors";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import Modal from "@/components/Modal";
 
 ChartJS.register(
   ArcElement,
@@ -69,62 +38,29 @@ ChartJS.register(
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [incomeToEdit, setIncomeToEdit] = useState<Income | null>(null);
   const [financialData, setFinancialData] = useState<FinancialData>({
     summary: [],
     income: [],
     expenses: [],
   });
+
+  // State for toggling sections
+  const [showIncome, setShowIncome] = useState(true);
+
+  // State for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [incomeIdToDelete, setIncomeIdToDelete] = useState<string | null>(null);
+
   const router = useRouter();
+  const data = useFinancialData();
 
   useEffect(() => {
-    const fetchData = async (user: User) => {
-      try {
-        const userId = user.uid;
-        const summarySnapshot = await getDocs(
-          collection(db, `users/${userId}/summary`)
-        );
-        const incomeSnapshot = await getDocs(
-          collection(db, `users/${userId}/income`)
-        );
-        const expensesSnapshot = await getDocs(
-          collection(db, `users/${userId}/expenses`)
-        );
+    setFinancialData(data);
+    setLoading(false);
+  }, [data]);
 
-        const summaryData = summarySnapshot.docs.map((doc) => doc.data());
-        const incomeData = incomeSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Income[];
-        const expensesData = expensesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setFinancialData({
-          summary: summaryData,
-          income: incomeData,
-          expenses: expensesData,
-        });
-      } catch (error) {
-        console.error("Error fetching financial data:", error);
-      }
-      setLoading(false); // User is authenticated, stop loading
-    };
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/unauthorized"); // Redirect to unauthorized page if not authenticated
-      } else {
-        fetchData(user);
-      }
-    });
-
-    return () => unsubscribe(); // Cleanup subscription on unmount
-  }, [router]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   const logout = async () => {
     try {
@@ -136,10 +72,50 @@ const Dashboard = () => {
   };
 
   const handleIncomeAdded = (newIncome: Income) => {
-    setFinancialData((prevData) => ({
-      ...prevData,
-      income: [...prevData.income, newIncome],
+    setFinancialData((prev) => ({
+      ...prev,
+      income: [...prev.income, newIncome],
     }));
+  };
+
+  const handleIncomeUpdated = (updatedIncome: Income) => {
+    setFinancialData((prev) => ({
+      ...prev,
+      income: prev.income.map((income) =>
+        income.id === updatedIncome.id ? updatedIncome : income
+      ),
+    }));
+    setIncomeToEdit(null);
+  };
+
+  const handleEditCancel = () => setIncomeToEdit(null);
+
+  const handleDeleteIncome = async (incomeId: string) => {
+    if (auth.currentUser) {
+      try {
+        const userId = auth.currentUser.uid;
+        await deleteDoc(doc(db, `users/${userId}/income`, incomeId));
+        setFinancialData((prev) => ({
+          ...prev,
+          income: prev.income.filter((income) => income.id !== incomeId),
+        }));
+        setIsModalOpen(false); // Close the modal after deletion
+      } catch (error) {
+        console.error("Error deleting income:", error);
+      }
+    } else {
+      console.error("User is not authenticated");
+    }
+  };
+
+  const openDeleteModal = (incomeId: string) => {
+    setIncomeIdToDelete(incomeId);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsModalOpen(false);
+    setIncomeIdToDelete(null);
   };
 
   if (loading) {
@@ -150,30 +126,30 @@ const Dashboard = () => {
     );
   }
 
-  // Process financial data for charts
-  const totalIncome =
-    financialData?.income.reduce((acc, item) => acc + item.amount, 0) || 0;
-  const totalExpenses =
-    financialData?.expenses.reduce((acc, item) => acc + item.amount, 0) || 0;
+  const totalIncome = financialData.income.reduce(
+    (acc, item) => acc + item.amount,
+    0
+  );
+  const totalExpenses = financialData.expenses.reduce(
+    (acc, item) => acc + item.amount,
+    0
+  );
   const netBalance = totalIncome - totalExpenses;
 
-  // Create color maps for income and expenses
   const incomeColorMap: Record<string, string> = {};
   const expenseColorMap: Record<string, string> = {};
 
-  const incomeCategories =
-    financialData?.income.reduce((acc, item) => {
-      const source = item.source || "Uncategorized";
-      acc[source] = (acc[source] || 0) + item.amount;
-      return acc;
-    }, {} as Record<string, number>) || {};
+  const incomeCategories = financialData.income.reduce((acc, item) => {
+    const source = item.source || "Uncategorized";
+    acc[source] = (acc[source] || 0) + item.amount;
+    return acc;
+  }, {} as Record<string, number>);
 
-  const expenseCategories =
-    financialData?.expenses.reduce((acc, item) => {
-      const category = item.category || "Uncategorized";
-      acc[category] = (acc[category] || 0) + item.amount;
-      return acc;
-    }, {} as Record<string, number>) || {};
+  const expenseCategories = financialData.expenses.reduce((acc, item) => {
+    const category = item.category || "Uncategorized";
+    acc[category] = (acc[category] || 0) + item.amount;
+    return acc;
+  }, {} as Record<string, number>);
 
   const incomeChartData = {
     labels: Object.keys(incomeCategories),
@@ -226,7 +202,55 @@ const Dashboard = () => {
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Income</h2>
               <Bar data={incomeChartData} />
-              <IncomeForm onIncomeAdded={handleIncomeAdded} />
+              <IncomeForm
+                onIncomeAdded={handleIncomeAdded}
+                incomeToEdit={incomeToEdit}
+                onEditCancel={handleEditCancel}
+                onIncomeUpdated={handleIncomeUpdated}
+              />
+              <button
+                onClick={() => setShowIncome((prev) => !prev)}
+                className="flex items-center space-x-2 pl-4 text-blue-500 hover:underline"
+              >
+                <span>{showIncome ? "Hide Income" : "Show Income"}</span>
+                <FontAwesomeIcon
+                  icon={showIncome ? faChevronUp : faChevronDown}
+                  className="ml-2"
+                  size="sm"
+                />
+              </button>
+              {showIncome && (
+                <>
+                  <ul className="mt-4 px-4">
+                    {financialData.income.map((income) => (
+                      <li
+                        key={income.id}
+                        className="flex justify-between items-center bg-dark-300 p-2 rounded-md mb-2"
+                      >
+                        <div>
+                          <p>{income.source}</p>
+                          <p>${income.amount.toFixed(2)}</p>
+                          <p>{new Date(income.date).toLocaleDateString()}</p>
+                        </div>
+                        <div className="space-x-2">
+                          <button
+                            onClick={() => setIncomeToEdit(income)}
+                            className="text-blue-500 hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(income.id!)}
+                            className="text-red-500 hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Expenses</h2>
@@ -235,6 +259,15 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={() => {
+          if (incomeIdToDelete) handleDeleteIncome(incomeIdToDelete);
+        }}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this income?"
+      />
     </div>
   );
 };
