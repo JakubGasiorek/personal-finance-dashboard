@@ -31,3 +31,12 @@ export const IncomeFormValidation = z.object({
     .nullable()
     .transform((val) => val || new Date()),
 });
+
+export const ExpenseFormValidation = z.object({
+  category: z.string().nonempty("Category is required"),
+  amount: z.number().min(0, "Amount must be a positive number"),
+  date: z
+    .date()
+    .nullable()
+    .transform((val) => val || new Date()),
+});
