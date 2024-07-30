@@ -19,14 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IncomeFormValidation } from "@/lib/validation";
-import { Income } from "@/types";
-
-interface IncomeFormProps {
-  onIncomeAdded: (income: Income) => void;
-  incomeToEdit?: Income | null;
-  onEditCancel?: () => void;
-  onIncomeUpdated?: (income: Income) => void;
-}
+import { IncomeFormProps } from "@/types";
 
 const IncomeForm = ({
   onIncomeAdded,
