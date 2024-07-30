@@ -25,6 +25,20 @@ export interface FinancialData {
   expenses: Expense[];
 }
 
+export interface IncomeFormProps {
+  onIncomeAdded: (income: Income) => void;
+  incomeToEdit?: Income | null;
+  onEditCancel?: () => void;
+  onIncomeUpdated?: (income: Income) => void;
+}
+
+export interface ExpenseFormProps {
+  onExpenseAdded: (expense: Expense) => void;
+  expenseToEdit?: Expense | null;
+  onEditCancel?: () => void;
+  onExpenseUpdated?: (expense: Expense) => void;
+}
+
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
