@@ -52,11 +52,17 @@ const useFinancialData = (): FinancialData => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchData(user);
+      } else {
+        setFinancialData({
+          summary: [],
+          income: [],
+          expenses: [],
+        });
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   return financialData;
 };
