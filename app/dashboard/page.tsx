@@ -15,6 +15,7 @@ import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import Modal from "@/components/Modal";
 import IncomeChart from "@/components/charts/IncomeChart";
 import ExpenseChart from "@/components/charts/ExpenseChart";
+import TransactionHistory from "@/components/TransactionHistory";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -190,6 +191,7 @@ const Dashboard = () => {
                 <p>Total Expenses: ${totalExpenses.toFixed(2)}</p>
                 <p>Net Balance: ${netBalance.toFixed(2)}</p>
               </div>
+              <TransactionHistory financialData={financialData} />
             </div>
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Income</h2>
