@@ -19,6 +19,8 @@ export interface Summary {
   totalIncome: number;
 }
 
+export type Transaction = Income | Expense;
+
 export interface FinancialData {
   summary: Summary[];
   income: Income[];
