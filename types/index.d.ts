@@ -48,3 +48,23 @@ export interface ModalProps {
   title: string;
   message: string;
 }
+
+export interface IncomeChartProps {
+  incomeData: FinancialData["income"];
+  colorMap: Record<string, string>;
+}
+
+export interface ExpenseChartProps {
+  expenseData: FinancialData["expenses"];
+  colorMap: Record<string, string>;
+}
+
+export interface TransactionHistoryProps {
+  financialData: FinancialData;
+}
+
+export interface PaginatedListProps<T> {
+  items: T[];
+  renderItem: (item: T) => JSX.Element;
+  itemsPerPage?: number;
+}
