@@ -16,6 +16,9 @@ import Modal from "@/components/Modal";
 import IncomeChart from "@/components/charts/IncomeChart";
 import ExpenseChart from "@/components/charts/ExpenseChart";
 import TransactionHistory from "@/components/TransactionHistory";
+import PaginatedList from "@/components/PaginatedList";
+
+const ITEMS_PER_PAGE = 3;
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -186,7 +189,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Summary</h2>
-              <div className="p-4 bg-dark-300 rounded-md">
+              <div className="p-3 space-y-1 bg-dark-300 rounded-md text-lg">
                 <p>Total Income: ${totalIncome.toFixed(2)}</p>
                 <p>Total Expenses: ${totalExpenses.toFixed(2)}</p>
                 <p>Net Balance: ${netBalance.toFixed(2)}</p>
@@ -217,34 +220,40 @@ const Dashboard = () => {
                 />
               </button>
               {showIncome && (
-                <ul className="mt-4 px-4">
-                  {financialData.income.map((income) => (
-                    <li
-                      key={income.id}
-                      className="flex justify-between items-center bg-dark-300 p-2 rounded-md mb-2"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate">{income.source}</p>
-                        <p>${income.amount.toFixed(2)}</p>
-                        <p>{new Date(income.date).toLocaleDateString()}</p>
+                <div className="mt-4">
+                  <PaginatedList
+                    items={financialData.income}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    renderItem={(income) => (
+                      <div
+                        key={income.id}
+                        className="flex justify-between items-center bg-dark-300 p-2 rounded-md mb-2"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate">{income.source}</p>
+                          <p>${income.amount.toFixed(2)}</p>
+                          <p>{new Date(income.date).toLocaleDateString()}</p>
+                        </div>
+                        <div className="space-x-2 flex-shrink-0">
+                          <button
+                            onClick={() => setIncomeToEdit(income)}
+                            className="text-blue-500 hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() =>
+                              openDeleteModal(income.id!, "income")
+                            }
+                            className="text-red-500 hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="space-x-2 flex-shrink-0">
-                        <button
-                          onClick={() => setIncomeToEdit(income)}
-                          className="text-blue-500 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(income.id!, "income")}
-                          className="text-red-500 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                    )}
+                  />
+                </div>
               )}
             </div>
             <div className="bg-dark-400 p-4 rounded-md">
@@ -271,36 +280,40 @@ const Dashboard = () => {
                 />
               </button>
               {showExpenses && (
-                <ul className="mt-4 px-4">
-                  {financialData.expenses.map((expense) => (
-                    <li
-                      key={expense.id}
-                      className="flex justify-between items-center bg-dark-300 p-2 rounded-md mb-2"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate">{expense.category}</p>
-                        <p>${expense.amount.toFixed(2)}</p>
-                        <p>{new Date(expense.date).toLocaleDateString()}</p>
+                <div className="mt-4">
+                  <PaginatedList
+                    items={financialData.expenses}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    renderItem={(expense) => (
+                      <div
+                        key={expense.id}
+                        className="flex justify-between items-center bg-dark-300 p-2 rounded-md mb-2"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate">{expense.category}</p>
+                          <p>${expense.amount.toFixed(2)}</p>
+                          <p>{new Date(expense.date).toLocaleDateString()}</p>
+                        </div>
+                        <div className="space-x-2 flex-shrink-0">
+                          <button
+                            onClick={() => setExpenseToEdit(expense)}
+                            className="text-blue-500 hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() =>
+                              openDeleteModal(expense.id!, "expense")
+                            }
+                            className="text-red-500 hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="space-x-2 flex-shrink-0">
-                        <button
-                          onClick={() => setExpenseToEdit(expense)}
-                          className="text-blue-500 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() =>
-                            openDeleteModal(expense.id!, "expense")
-                          }
-                          className="text-red-500 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                    )}
+                  />
+                </div>
               )}
             </div>
           </div>

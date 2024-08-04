@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FinancialData, Transaction } from "@/types";
+import { Transaction, TransactionHistoryProps } from "@/types";
+import PaginatedList from "@/components/PaginatedList";
 
-interface TransactionHistoryProps {
-  financialData: FinancialData;
-}
+const ITEMS_PER_PAGE = 6;
 
 const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   financialData,
@@ -52,16 +51,16 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   }, [startDate, endDate, filter, financialData]);
 
   return (
-    <div className="p-4 bg-dark-400 rounded-md">
+    <div className="py-4 bg-dark-400 rounded-md">
       <h2 className="text-xl mb-4">Transaction History</h2>
-      <div className="grid gap-4 md:grid-cols-3 mb-4">
+      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2 mb-[1.1rem]">
         <div>
           <label className="block mb-2">Start Date</label>
           <DatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
             dateFormat="yyyy/MM/dd"
-            className="w-full h-10 px-3 py-2 border rounded-md bg-dark-300 text-white"
+            className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div>
@@ -70,35 +69,45 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             selected={endDate}
             onChange={(date) => setEndDate(date)}
             dateFormat="yyyy/MM/dd"
-            className="w-full h-10 px-3 py-2 border rounded-md bg-dark-300 text-white"
+            className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div>
-          <label className="block mb-2">Filter by Category/Source</label>
+          <label className="block mb-2">Filter by name</label>
           <Input
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Category/Source"
-            className="w-full h-10 px-3 py-2 border rounded-md bg-dark-300 text-white"
+            className="h-10 w-full border rounded-md border-dark-500 bg-dark-400"
           />
         </div>
       </div>
-      <div>
-        {filteredTransactions.map((transaction) => (
-          <div key={transaction.id} className="p-2 border-b border-dark-300">
-            <div>
-              <strong>{"source" in transaction ? "Income" : "Expense"}</strong>
+      <PaginatedList
+        items={filteredTransactions}
+        itemsPerPage={ITEMS_PER_PAGE}
+        renderItem={(transaction) => {
+          const isIncome = "source" in transaction;
+          const textColor = isIncome ? "text-green-500" : "text-red-500";
+
+          return (
+            <div
+              key={transaction.id}
+              className="p-2 bg-dark-300 rounded-md mb-2"
+            >
+              <div>
+                <strong className={`${textColor}`}>
+                  {isIncome ? "Income" : "Expense"}
+                </strong>
+              </div>
+              <div>{new Date(transaction.date).toLocaleDateString()}</div>
+              <div>Amount: ${transaction.amount.toFixed(2)}</div>
+              <div className="truncate">
+                {isIncome ? transaction.source : transaction.category}
+              </div>
             </div>
-            <div>{new Date(transaction.date).toLocaleDateString()}</div>
-            <div>Amount: ${transaction.amount.toFixed(2)}</div>
-            <div>
-              {"category" in transaction
-                ? transaction.category
-                : transaction.source}
-            </div>
-          </div>
-        ))}
-      </div>
+          );
+        }}
+      />
     </div>
   );
 };
