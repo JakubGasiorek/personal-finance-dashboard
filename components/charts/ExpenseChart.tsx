@@ -9,14 +9,9 @@ import {
   TooltipItem,
 } from "chart.js";
 import { getColorForCategory } from "@/lib/colors";
-import { FinancialData } from "@/types";
+import { ExpenseChartProps } from "@/types";
 
 ChartJS.register(ArcElement, Tooltip, Title, Legend);
-
-interface ExpenseChartProps {
-  expenseData: FinancialData["expenses"];
-  colorMap: Record<string, string>;
-}
 
 const ExpenseChart: React.FC<ExpenseChartProps> = ({
   expenseData,

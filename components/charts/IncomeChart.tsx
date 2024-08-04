@@ -10,14 +10,9 @@ import {
   TooltipItem,
 } from "chart.js";
 import { getColorForCategory } from "@/lib/colors";
-import { FinancialData } from "@/types";
+import { IncomeChartProps } from "@/types";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Title);
-
-interface IncomeChartProps {
-  incomeData: FinancialData["income"];
-  colorMap: Record<string, string>;
-}
 
 const IncomeChart: React.FC<IncomeChartProps> = ({ incomeData, colorMap }) => {
   const categories = incomeData.reduce((acc, income) => {
@@ -55,18 +50,18 @@ const IncomeChart: React.FC<IncomeChartProps> = ({ incomeData, colorMap }) => {
     scales: {
       x: {
         ticks: {
-          color: "white", // Set x-axis label color to white
+          color: "white",
         },
         grid: {
-          color: "rgba(255, 255, 255, 0.1)", // Optional: Set grid line color to a light shade for better visibility
+          color: "rgba(255, 255, 255, 0.1)",
         },
       },
       y: {
         ticks: {
-          color: "white", // Set y-axis label color to white
+          color: "white",
         },
         grid: {
-          color: "rgba(255, 255, 255, 0.1)", // Optional: Set grid line color to a light shade for better visibility
+          color: "rgba(255, 255, 255, 0.1)",
         },
       },
     },
