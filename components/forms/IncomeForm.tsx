@@ -102,7 +102,7 @@ const IncomeForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleAddIncome)}
-        className="space-y-4 p-4 mx-auto"
+        className="space-y-4 py-4 mx-auto"
       >
         <div className="grid gap-4 md:grid-cols-2">
           <FormField
