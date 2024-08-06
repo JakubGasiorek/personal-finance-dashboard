@@ -1,12 +1,7 @@
 "use client";
 
+import { SidebarProps } from "@/types";
 import { FC } from "react";
-
-interface SidebarProps {
-  isOpen: boolean;
-  toggleSidebar: () => void;
-  logout: () => void;
-}
 
 const Sidebar: FC<SidebarProps> = ({ isOpen, toggleSidebar, logout }) => {
   return (
@@ -21,18 +16,13 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, toggleSidebar, logout }) => {
       >
         X
       </button>
+
       <ul className="p-4 space-y-2 mt-12 text-white">
         <li>
           <a href="/dashboard">Dashboard</a>
         </li>
         <li>
-          <a href="/dashboard/expenses">Expenses</a>
-        </li>
-        <li>
-          <a href="/dashboard/income">Income</a>
-        </li>
-        <li>
-          <a href="/dashboard/settings">Settings</a>
+          <a href="/dashboard/goals">Goals</a>
         </li>
         <li>
           <button onClick={logout}>Logout</button>
