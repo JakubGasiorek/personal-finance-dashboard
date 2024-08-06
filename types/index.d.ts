@@ -1,3 +1,9 @@
+export interface SidebarProps {
+  isOpen: boolean;
+  toggleSidebar: () => void;
+  logout: () => void;
+}
+
 export interface Income {
   id: string;
   source: string;
@@ -67,4 +73,17 @@ export interface PaginatedListProps<T> {
   items: T[];
   renderItem: (item: T) => JSX.Element;
   itemsPerPage?: number;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export interface GoalFormProps {
+  onGoalAdded: (goal: Goal) => void;
+  goalToEdit?: Goal | null;
+  onEditCancel?: () => void;
+  onGoalUpdated?: (goal: Goal) => void;
 }

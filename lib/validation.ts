@@ -40,3 +40,8 @@ export const ExpenseFormValidation = z.object({
     .nullable()
     .transform((val) => val || new Date()),
 });
+
+export const GoalFormValidation = z.object({
+  title: z.string().nonempty("Title is required"),
+  description: z.string().nonempty("Description is required"),
+});
