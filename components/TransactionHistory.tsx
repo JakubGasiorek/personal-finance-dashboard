@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { Transaction, TransactionHistoryProps } from "@/types";
 import PaginatedList from "@/components/PaginatedList";
 
@@ -51,29 +50,39 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   }, [startDate, endDate, filter, financialData]);
 
   return (
-    <div className="py-4 bg-dark-400 rounded-md">
-      <h2 className="text-xl mb-4">Transaction History</h2>
-      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2 mb-[1.1rem]">
+    <div className="py-4 bg-dark-400 rounded-md w-full">
+      <h2 className="text-xl mb-4">Transaction history</h2>
+      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2 mb-[1.7rem]">
         <div>
-          <label className="block mb-2">Start Date</label>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            dateFormat="yyyy/MM/dd"
-            className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          />
+          <label className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Start date
+          </label>
+          <div className="flex flex-col">
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              dateFormat="yyyy/MM/dd"
+              className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            />
+          </div>
         </div>
         <div>
-          <label className="block mb-2">End Date</label>
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            dateFormat="yyyy/MM/dd"
-            className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          />
+          <label className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            End date
+          </label>
+          <div className="flex flex-col">
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              dateFormat="yyyy/MM/dd"
+              className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            />
+          </div>
         </div>
-        <div>
-          <label className="block mb-2">Filter by name</label>
+        <div className="xl:col-span-1 col-span-2">
+          <label className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Filter by name
+          </label>
           <Input
             value={filter}
             onChange={(e) => setFilter(e.target.value)}

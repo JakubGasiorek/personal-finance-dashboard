@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import IncomeForm from "@/components/forms/IncomeForm";
 import ExpenseForm from "@/components/forms/ExpenseForm";
 import useFinancialData from "@/hooks/useFinancialData";
+import useSidebar from "@/hooks/useSidebar";
+import useAuth from "@/hooks/useAuth";
 import { FinancialData, Income, Expense } from "@/types";
 import { auth, db } from "@/services/firebase";
 import { deleteDoc, doc } from "firebase/firestore";
@@ -21,7 +22,6 @@ import PaginatedList from "@/components/PaginatedList";
 const ITEMS_PER_PAGE = 3;
 
 const Dashboard = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [incomeToEdit, setIncomeToEdit] = useState<Income | null>(null);
   const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
@@ -30,6 +30,9 @@ const Dashboard = () => {
     income: [],
     expenses: [],
   });
+
+  const { isSidebarOpen, toggleSidebar } = useSidebar();
+  const { logout } = useAuth();
 
   // State for toggling sections
   const [showIncome, setShowIncome] = useState(true);
@@ -46,24 +49,12 @@ const Dashboard = () => {
   const incomeColorMap: Record<string, string> = {};
   const expenseColorMap: Record<string, string> = {};
 
-  const router = useRouter();
   const data = useFinancialData();
 
   useEffect(() => {
     setFinancialData(data);
     setLoading(false);
   }, [data]);
-
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
-
-  const logout = async () => {
-    try {
-      await auth.signOut();
-      router.push("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   const handleIncomeAdded = (newIncome: Income) => {
     setFinancialData((prev) => ({
@@ -187,7 +178,7 @@ const Dashboard = () => {
             Welcome to your dashboard
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-dark-400 p-4 rounded-md">
+            <div className="bg-dark-400 p-4 rounded-md lg:col-span-1 md:col-span-2">
               <h2 className="text-xl mb-4">Summary</h2>
               <div className="p-3 space-y-1 bg-dark-300 rounded-md text-lg">
                 <p>Total Income: ${totalIncome.toFixed(2)}</p>
