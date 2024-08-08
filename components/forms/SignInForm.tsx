@@ -86,7 +86,7 @@ const SignInForm = () => {
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-green-800 w-full"
+          className="bg-green-800 hover:bg-green-600 w-full"
         >
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>

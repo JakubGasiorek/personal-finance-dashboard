@@ -1,5 +1,6 @@
 import { PaginatedListProps } from "@/types";
 import { useState } from "react";
+import { Button } from "./ui/button";
 
 const PaginatedList = <T,>({
   items,
@@ -26,23 +27,23 @@ const PaginatedList = <T,>({
         <ul>{displayedItems.map(renderItem)}</ul>
       </div>
       <div className="flex justify-between mt-4 items-center">
-        <button
+        <Button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-2 md:px-4 py-2 bg-green-800 rounded-md disabled:opacity-50"
+          className="px-2 md:px-4 py-2 bg-green-800 hover:bg-green-600 rounded-md disabled:opacity-50"
         >
           Previous
-        </button>
+        </Button>
         <span>
           Page {currentPage} of {totalPages}
         </span>
-        <button
+        <Button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-2 md:px-4 py-2 bg-green-800 rounded-md disabled:opacity-50"
+          className="px-2 md:px-4 py-2 bg-green-800 hover:bg-green-600 rounded-md disabled:opacity-50"
         >
           Next
-        </button>
+        </Button>
       </div>
     </>
   );
