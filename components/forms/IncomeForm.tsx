@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { db, auth } from "@/services/firebase";
+import { db } from "@/services/firebase";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,6 +20,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IncomeFormValidation } from "@/lib/validation";
 import { IncomeFormProps } from "@/types";
+import { withAuthenticatedUser } from "@/lib/utils";
 
 const IncomeForm = ({
   onIncomeAdded,
@@ -50,20 +51,18 @@ const IncomeForm = ({
   const handleAddIncome = async (
     data: z.infer<typeof IncomeFormValidation>
   ) => {
-    if (auth.currentUser) {
-      setIsLoading(true);
-      try {
-        const parsedData = {
-          ...data,
-          amount:
-            typeof data.amount === "string"
-              ? parseFloat(data.amount)
-              : data.amount,
-          date: data.date ? new Date(data.date) : new Date(),
-        };
+    setIsLoading(true);
+    try {
+      const parsedData = {
+        ...data,
+        amount:
+          typeof data.amount === "string"
+            ? parseFloat(data.amount)
+            : data.amount,
+        date: data.date ? new Date(data.date) : new Date(),
+      };
 
-        const userId = auth.currentUser.uid;
-
+      await withAuthenticatedUser(async (userId) => {
         if (incomeToEdit && incomeToEdit.id) {
           // Update existing income
           const incomeDocRef = doc(
@@ -83,18 +82,17 @@ const IncomeForm = ({
           );
           onIncomeAdded({ ...parsedData, id: docRef.id });
         }
-        form.reset({
-          source: "",
-          amount: 0,
-          date: new Date(),
-        });
-      } catch (error) {
-        console.error("Error adding/updating income:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      console.error("User is not authenticated");
+      });
+
+      form.reset({
+        source: "",
+        amount: 0,
+        date: new Date(),
+      });
+    } catch (error) {
+      console.error("Error adding/updating income:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -163,7 +161,7 @@ const IncomeForm = ({
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-green-800 w-full"
+            className="bg-green-800 hover:bg-green-600 w-full"
           >
             {isLoading
               ? incomeToEdit
@@ -186,7 +184,7 @@ const IncomeForm = ({
                   onEditCancel();
                 }
               }}
-              className="bg-red-800 w-full"
+              className="bg-red-900 hover:bg-red-600 w-full"
             >
               Cancel
             </Button>

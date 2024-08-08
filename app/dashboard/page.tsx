@@ -9,7 +9,7 @@ import useFinancialData from "@/hooks/useFinancialData";
 import useSidebar from "@/hooks/useSidebar";
 import useAuth from "@/hooks/useAuth";
 import { FinancialData, Income, Expense } from "@/types";
-import { auth, db } from "@/services/firebase";
+import { db } from "@/services/firebase";
 import { deleteDoc, doc } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
@@ -18,6 +18,8 @@ import IncomeChart from "@/components/charts/IncomeChart";
 import ExpenseChart from "@/components/charts/ExpenseChart";
 import TransactionHistory from "@/components/TransactionHistory";
 import PaginatedList from "@/components/PaginatedList";
+import { withAuthenticatedUser } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -96,9 +98,8 @@ const Dashboard = () => {
   };
 
   const handleDeleteIncome = async (incomeId: string) => {
-    if (auth.currentUser) {
+    await withAuthenticatedUser(async (userId) => {
       try {
-        const userId = auth.currentUser.uid;
         await deleteDoc(doc(db, `users/${userId}/income`, incomeId));
         setFinancialData((prev) => ({
           ...prev,
@@ -108,15 +109,12 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Error deleting income:", error);
       }
-    } else {
-      console.error("User is not authenticated");
-    }
+    });
   };
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (auth.currentUser) {
+    await withAuthenticatedUser(async (userId) => {
       try {
-        const userId = auth.currentUser.uid;
         await deleteDoc(doc(db, `users/${userId}/expenses`, expenseId));
         setFinancialData((prev) => ({
           ...prev,
@@ -126,9 +124,7 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Error deleting expense:", error);
       }
-    } else {
-      console.error("User is not authenticated");
-    }
+    });
   };
 
   const openDeleteModal = (id: string, type: "income" | "expense") => {
@@ -226,20 +222,20 @@ const Dashboard = () => {
                           <p>{new Date(income.date).toLocaleDateString()}</p>
                         </div>
                         <div className="space-x-2 flex-shrink-0">
-                          <button
+                          <Button
                             onClick={() => setIncomeToEdit(income)}
-                            className="text-blue-500 hover:underline"
+                            className="bg-blue-900 hover:bg-blue-600 "
                           >
                             Edit
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() =>
                               openDeleteModal(income.id!, "income")
                             }
-                            className="text-red-500 hover:underline"
+                            className="bg-red-900 hover:bg-red-600 text-white"
                           >
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -286,20 +282,20 @@ const Dashboard = () => {
                           <p>{new Date(expense.date).toLocaleDateString()}</p>
                         </div>
                         <div className="space-x-2 flex-shrink-0">
-                          <button
+                          <Button
                             onClick={() => setExpenseToEdit(expense)}
-                            className="text-blue-500 hover:underline"
+                            className="bg-blue-900 hover:bg-blue-600 "
                           >
                             Edit
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() =>
                               openDeleteModal(expense.id!, "expense")
                             }
-                            className="text-red-500 hover:underline"
+                            className="bg-red-900 hover:bg-red-600 "
                           >
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     )}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { db, auth } from "@/services/firebase";
+import { db } from "@/services/firebase";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,6 +20,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ExpenseFormValidation } from "@/lib/validation";
 import { ExpenseFormProps } from "@/types";
+import { withAuthenticatedUser } from "@/lib/utils";
 
 const ExpenseForm = ({
   onExpenseAdded,
@@ -50,20 +51,18 @@ const ExpenseForm = ({
   const handleAddExpense = async (
     data: z.infer<typeof ExpenseFormValidation>
   ) => {
-    if (auth.currentUser) {
-      setIsLoading(true);
-      try {
-        const parsedData = {
-          ...data,
-          amount:
-            typeof data.amount === "string"
-              ? parseFloat(data.amount)
-              : data.amount,
-          date: data.date ? new Date(data.date) : new Date(),
-        };
+    setIsLoading(true);
+    try {
+      const parsedData = {
+        ...data,
+        amount:
+          typeof data.amount === "string"
+            ? parseFloat(data.amount)
+            : data.amount,
+        date: data.date ? new Date(data.date) : new Date(),
+      };
 
-        const userId = auth.currentUser.uid;
-
+      await withAuthenticatedUser(async (userId) => {
         if (expenseToEdit && expenseToEdit.id) {
           // Update existing expense
           const expenseDocRef = doc(
@@ -83,18 +82,17 @@ const ExpenseForm = ({
           );
           onExpenseAdded({ ...parsedData, id: docRef.id });
         }
-        form.reset({
-          category: "",
-          amount: 0,
-          date: new Date(),
-        });
-      } catch (error) {
-        console.error("Error adding/updating expense:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      console.error("User is not authenticated");
+      });
+
+      form.reset({
+        category: "",
+        amount: 0,
+        date: new Date(),
+      });
+    } catch (error) {
+      console.error("Error adding/updating expense:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -163,7 +161,7 @@ const ExpenseForm = ({
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-green-800 w-full"
+            className="bg-green-800 hover:bg-green-600 w-full"
           >
             {isLoading
               ? expenseToEdit
@@ -186,7 +184,7 @@ const ExpenseForm = ({
                   onEditCancel();
                 }
               }}
-              className="bg-red-800 w-full"
+              className="bg-red-900 hover:bg-red-600 w-full"
             >
               Cancel
             </Button>
