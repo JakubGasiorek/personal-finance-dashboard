@@ -41,7 +41,14 @@ export const ExpenseFormValidation = z.object({
     .transform((val) => val || new Date()),
 });
 
-export const GoalFormValidation = z.object({
-  title: z.string().nonempty("Title is required"),
-  description: z.string().nonempty("Description is required"),
-});
+export const GoalFormValidation = z
+  .object({
+    title: z.string().nonempty("Title is required"),
+    description: z.string().nonempty("Description is required"),
+    amount: z.number().min(0, "Amount must be a positive number"),
+    amountNeeded: z.number().min(1, "Needed amount must be greater than 0"),
+  })
+  .refine((data) => data.amountNeeded > data.amount, {
+    message: "Needed amount must be higher than the starting amount",
+    path: ["amountNeeded"],
+  });
