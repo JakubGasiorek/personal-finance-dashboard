@@ -161,16 +161,16 @@ const Dashboard = () => {
   const netBalance = totalIncome - totalExpenses;
 
   return (
-    <div className="flex min-h-screen bg-dark-300">
+    <div className="bg-dark-300">
       <Sidebar
         isOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
         logout={logout}
       />
-      <div className="flex-1">
+      <div>
         <Navbar toggleSidebar={toggleSidebar} />
-        <div className="text-white mt-8 px-4 mb-8">
-          <h1 className="flex-center text-xl xl:text-3xl mb-8">
+        <div className="text-white my-8 px-4">
+          <h1 className="text-center text-xl xl:text-3xl mb-8">
             Welcome to your dashboard
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
