@@ -22,7 +22,7 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, toggleSidebar, logout }) => {
           <a href="/dashboard">Dashboard</a>
         </li>
         <li>
-          <a href="/dashboard/goals">Goals</a>
+          <a href="/goals">Goals</a>
         </li>
         <li>
           <button onClick={logout}>Logout</button>
