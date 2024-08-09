@@ -1,5 +1,6 @@
 import { ModalProps } from "@/types";
 import React from "react";
+import { Button } from "./ui/button";
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
@@ -16,18 +17,18 @@ const Modal: React.FC<ModalProps> = ({
         <h3 className="text-lg font-bold mb-4">{title}</h3>
         <p className="mb-4">{message}</p>
         <div className="flex justify-end space-x-4">
-          <button
+          <Button
             onClick={onConfirm}
-            className="bg-red-700 text-white px-4 py-2 rounded-md"
+            className="bg-red-900 hover:bg-red-600 text-white px-4 py-2 rounded-md"
           >
             Confirm
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onClose}
-            className="bg-gray-300 text-black px-4 py-2 rounded-md"
+            className="bg-gray-300 hover:bg-gray-600 text-black px-4 py-2 rounded-md"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>
