@@ -8,17 +8,27 @@ import useSidebar from "@/hooks/useSidebar";
 import useAuth from "@/hooks/useAuth";
 import GoalForm from "@/components/forms/GoalForm";
 import { db } from "@/services/firebase";
-import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { Goal } from "@/types";
 import { withAuthenticatedUser } from "@/lib/utils";
 import ProgressBarChart from "@/components/charts/ProgressBarChart";
 import Modal from "@/components/Modal";
+import { Input } from "@/components/ui/input";
 
 const Goals: React.FC = () => {
   const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null);
+  const [goalToAddValue, setGoalToAddValue] = useState<Goal | null>(null);
   const [goalList, setGoalList] = useState<Goal[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAddValueModalOpen, setIsAddValueModalOpen] = useState(false);
+  const [addValueAmount, setAddValueAmount] = useState<number>(0);
 
   const { isSidebarOpen, toggleSidebar } = useSidebar();
   const { logout } = useAuth();
@@ -58,7 +68,7 @@ const Goals: React.FC = () => {
       try {
         await deleteDoc(doc(db, `users/${userId}/goals`, goalId));
         setGoalList(goalList.filter((goal) => goal.id !== goalId));
-        setIsModalOpen(false);
+        setIsDeleteModalOpen(false);
       } catch (error) {
         console.error("Error deleting goal:", error);
       }
@@ -71,11 +81,33 @@ const Goals: React.FC = () => {
 
   const confirmDeleteGoal = (goal: Goal) => {
     setGoalToDelete(goal);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
-  const handleEditCancel = () => {
-    setGoalToEdit(null);
+  const openAddValueModal = (goal: Goal) => {
+    setGoalToAddValue(goal);
+    setIsAddValueModalOpen(true);
+  };
+
+  const handleAddValue = async () => {
+    if (!goalToAddValue) return;
+
+    const updatedGoal = {
+      ...goalToAddValue,
+      amount: goalToAddValue.amount + addValueAmount,
+    };
+
+    await withAuthenticatedUser(async (userId) => {
+      const goalDocRef = doc(db, `users/${userId}/goals`, goalToAddValue.id);
+      await updateDoc(goalDocRef, { amount: updatedGoal.amount });
+      setGoalList(
+        goalList.map((g) => (g.id === updatedGoal.id ? updatedGoal : g))
+      );
+    });
+
+    setIsAddValueModalOpen(false);
+    setGoalToAddValue(null);
+    setAddValueAmount(0);
   };
 
   return (
@@ -98,7 +130,7 @@ const Goals: React.FC = () => {
                 onGoalAdded={handleAddGoal}
                 goalToEdit={goalToEdit}
                 onGoalUpdated={handleUpdateGoal}
-                onEditCancel={handleEditCancel}
+                onEditCancel={() => setGoalToEdit(null)}
               />
             </div>
 
@@ -128,6 +160,12 @@ const Goals: React.FC = () => {
                         >
                           Delete
                         </Button>
+                        <Button
+                          onClick={() => openAddValueModal(goal)}
+                          className="bg-green-900 hover:bg-green-600"
+                        >
+                          Add Value
+                        </Button>
                       </div>
                     </div>
                     <ProgressBarChart
@@ -146,10 +184,30 @@ const Goals: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* Add modal for adding to the goal */}
+
+      {/* Modal for adding value to the goal */}
       <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isAddValueModalOpen}
+        onClose={() => setIsAddValueModalOpen(false)}
+        onConfirm={handleAddValue}
+        title={`Add Value to ${goalToAddValue?.title}`}
+        message={
+          <div>
+            <p className="mb-4">Enter the amount to add to this goal:</p>
+            <Input
+              type="number"
+              value={addValueAmount}
+              onChange={(e) => setAddValueAmount(Number(e.target.value))}
+              className="rounded-md border border-dark-500 bg-dark-400"
+            />
+          </div>
+        }
+      />
+
+      {/* Modal for confirming deletion */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={() => goalToDelete && handleDeleteGoal(goalToDelete.id)}
         title="Confirm Delete"
         message={`Are you sure you want to delete the goal "${goalToDelete?.title}"?`}
