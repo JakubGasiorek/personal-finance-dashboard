@@ -111,10 +111,26 @@
   .text-12-semibold {
     @apply text-[12px] leading-[16px] font-semibold;
   }
+
+  /* =====  BUTTONS */
+  .btn-edit {
+    @apply bg-blue-900 hover:bg-blue-600 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md;
+  }
+
+  .btn-delete {
+    @apply bg-red-900 hover:bg-red-600 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md;
+  }
+
+  .btn-add-value {
+    @apply bg-green-900 hover:bg-green-600 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md;
+  }
+
+  .btn-modal-cancel {
+    @apply bg-gray-300 hover:bg-gray-600 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md;
+  }
 }
 
 /* =====  REACT-DATEPICKER OVERRIDES */
-
 .react-datepicker,
 .react-datepicker__time,
 .react-datepicker__header,
