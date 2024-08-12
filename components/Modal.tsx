@@ -15,18 +15,12 @@ const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-dark-400 p-6 rounded-md shadow-lg w-full max-w-sm mx-4 text-white">
         <h3 className="text-lg font-bold mb-4">{title}</h3>
-        <p className="mb-4">{message}</p>
+        <div className="mb-4">{message}</div>
         <div className="flex justify-end space-x-4">
-          <Button
-            onClick={onConfirm}
-            className="bg-red-900 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-          >
+          <Button onClick={onConfirm} className="btn-delete text-white">
             Confirm
           </Button>
-          <Button
-            onClick={onClose}
-            className="bg-gray-300 hover:bg-gray-600 text-black px-4 py-2 rounded-md"
-          >
+          <Button onClick={onClose} className="btn-modal-cancel text-black">
             Cancel
           </Button>
         </div>

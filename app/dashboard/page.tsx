@@ -224,7 +224,7 @@ const Dashboard = () => {
                         <div className="space-x-2 flex-shrink-0">
                           <Button
                             onClick={() => setIncomeToEdit(income)}
-                            className="bg-blue-900 hover:bg-blue-600 "
+                            className="btn-edit"
                           >
                             Edit
                           </Button>
@@ -232,7 +232,7 @@ const Dashboard = () => {
                             onClick={() =>
                               openDeleteModal(income.id!, "income")
                             }
-                            className="bg-red-900 hover:bg-red-600 text-white"
+                            className="btn-delete"
                           >
                             Delete
                           </Button>
@@ -284,7 +284,7 @@ const Dashboard = () => {
                         <div className="space-x-2 flex-shrink-0">
                           <Button
                             onClick={() => setExpenseToEdit(expense)}
-                            className="bg-blue-900 hover:bg-blue-600 "
+                            className="btn-edit"
                           >
                             Edit
                           </Button>
@@ -292,7 +292,7 @@ const Dashboard = () => {
                             onClick={() =>
                               openDeleteModal(expense.id!, "expense")
                             }
-                            className="bg-red-900 hover:bg-red-600 "
+                            className="btn-delete"
                           >
                             Delete
                           </Button>

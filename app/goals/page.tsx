@@ -147,22 +147,22 @@ const Goals: React.FC = () => {
                           {goal.description}
                         </span>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <Button
                           onClick={() => handleEditGoal(goal)}
-                          className="bg-blue-900 hover:bg-blue-600"
+                          className="btn-edit"
                         >
                           Edit
                         </Button>
                         <Button
                           onClick={() => confirmDeleteGoal(goal)}
-                          className="bg-red-900 hover:bg-red-600"
+                          className="btn-delete"
                         >
                           Delete
                         </Button>
                         <Button
                           onClick={() => openAddValueModal(goal)}
-                          className="bg-green-900 hover:bg-green-600"
+                          className="col-span-2 btn-add-value"
                         >
                           Add Value
                         </Button>

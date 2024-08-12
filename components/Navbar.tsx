@@ -8,7 +8,7 @@ interface NavbarProps {
 
 const Navbar: FC<NavbarProps> = ({ toggleSidebar }) => {
   return (
-    <nav className="flex-between p-4 bg-green-500">
+    <nav className="flex-between p-4 bg-green-900 text-white">
       <h1 className="text-2xl font-bold">FinTrack</h1>
       <button onClick={toggleSidebar}>
         <svg

@@ -161,7 +161,7 @@ const IncomeForm = ({
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-green-800 hover:bg-green-600 w-full"
+            className="btn-add-value w-full"
           >
             {isLoading
               ? incomeToEdit
@@ -184,7 +184,7 @@ const IncomeForm = ({
                   onEditCancel();
                 }
               }}
-              className="bg-red-900 hover:bg-red-600 w-full"
+              className="btn-delete w-full"
             >
               Cancel
             </Button>
