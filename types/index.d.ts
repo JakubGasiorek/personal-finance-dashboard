@@ -89,3 +89,9 @@ export interface GoalFormProps {
   onEditCancel?: () => void;
   onGoalUpdated?: (goal: Goal) => void;
 }
+
+export interface GoalsState {
+  goals: Goal[];
+  loading: boolean;
+  error: string | null;
+}
