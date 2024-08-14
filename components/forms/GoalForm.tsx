@@ -16,16 +16,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GoalFormValidation } from "@/lib/validation";
 import { GoalFormProps } from "@/types";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/services/firebase";
-import { withAuthenticatedUser } from "@/lib/utils";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { addGoal, updateGoal } from "@/store/goalsSlice";
 
-const GoalForm = ({
-  onGoalAdded,
-  goalToEdit = null,
-  onEditCancel,
-  onGoalUpdated,
-}: GoalFormProps) => {
+const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.goals);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof GoalFormValidation>>({
@@ -46,39 +43,27 @@ const GoalForm = ({
 
   const handleAddGoal = async (data: z.infer<typeof GoalFormValidation>) => {
     setIsLoading(true);
+    const parsedData = {
+      ...data,
+      amount:
+        typeof data.amount === "string" ? parseFloat(data.amount) : data.amount,
+      amountNeeded:
+        typeof data.amountNeeded === "string"
+          ? parseFloat(data.amountNeeded)
+          : data.amountNeeded,
+    };
+
     try {
-      const parsedData = {
-        ...data,
-        amount:
-          typeof data.amount === "string"
-            ? parseFloat(data.amount)
-            : data.amount,
-        amountNeeded:
-          typeof data.amountNeeded === "string"
-            ? parseFloat(data.amountNeeded)
-            : data.amountNeeded,
-      };
-
-      await withAuthenticatedUser(async (userId) => {
-        if (goalToEdit && goalToEdit.id) {
-          // Update existing goal
-          const goalsDocRef = doc(db, `users/${userId}/goals`, goalToEdit.id);
-
-          await updateDoc(goalsDocRef, parsedData);
-          if (onGoalUpdated) {
-            onGoalUpdated({ ...parsedData, id: goalToEdit.id });
-          }
-        } else {
-          // Add new goal
-          const docRef = await addDoc(
-            collection(db, `users/${userId}/goals`),
-            parsedData
-          );
-          onGoalAdded({ ...parsedData, id: docRef.id });
-        }
-      });
+      if (goalToEdit && goalToEdit.id) {
+        // Update existing goal
+        await dispatch(updateGoal({ ...parsedData, id: goalToEdit.id }));
+      } else {
+        // Add new goal
+        await dispatch(addGoal(parsedData));
+      }
 
       form.reset({ title: "", description: "", amountNeeded: 0, amount: 0 });
+      if (onEditCancel) onEditCancel();
     } catch (error) {
       console.error("Error adding/updating goal:", error);
     } finally {
@@ -165,10 +150,10 @@ const GoalForm = ({
         <div className="flex space-x-4">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || loading}
             className="btn-add-value w-full"
           >
-            {isLoading
+            {isLoading || loading
               ? goalToEdit
                 ? "Updating Goal..."
                 : "Adding Goal..."
@@ -196,6 +181,7 @@ const GoalForm = ({
             </Button>
           )}
         </div>
+        {error && <p className="text-red-500">{error}</p>}
       </form>
     </Form>
   );
