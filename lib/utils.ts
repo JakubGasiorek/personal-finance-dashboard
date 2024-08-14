@@ -6,10 +6,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type AuthenticatedAction = (userId: string) => Promise<void>;
+type AuthenticatedAction<T> = (userId: string) => Promise<T>;
 
-export async function withAuthenticatedUser(action: AuthenticatedAction) {
-  return new Promise<void>((resolve, reject) => {
+export async function withAuthenticatedUser<T>(
+  action: AuthenticatedAction<T>
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
     const unsubscribe = auth.onAuthStateChanged(
       async (user) => {
         unsubscribe();
@@ -22,8 +24,8 @@ export async function withAuthenticatedUser(action: AuthenticatedAction) {
 
         const userId = user.uid;
         try {
-          await action(userId);
-          resolve();
+          const result = await action(userId);
+          resolve(result);
         } catch (error) {
           console.error("Error performing authenticated action:", error);
           reject(error);
