@@ -20,8 +20,19 @@ import { withAuthenticatedUser } from "@/lib/utils";
 import ProgressBarChart from "@/components/charts/ProgressBarChart";
 import Modal from "@/components/Modal";
 import { Input } from "@/components/ui/input";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import {
+  addGoal,
+  deleteGoal,
+  fetchGoals,
+  updateGoal,
+} from "@/store/goalsSlice";
 
 const Goals: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { goals, loading } = useSelector((state: RootState) => state.goals);
+
   const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null);
   const [goalToAddValue, setGoalToAddValue] = useState<Goal | null>(null);
@@ -34,45 +45,21 @@ const Goals: React.FC = () => {
   const { logout } = useAuth();
 
   useEffect(() => {
-    const fetchGoals = async () => {
-      try {
-        await withAuthenticatedUser(async (userId) => {
-          const goalsSnapshot = await getDocs(
-            collection(db, `users/${userId}/goals`)
-          );
-          const goalsData = goalsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Goal[];
-          setGoalList(goalsData);
-        });
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchGoals();
-  }, []);
+    dispatch(fetchGoals());
+  }, [dispatch]);
 
   const handleAddGoal = (goal: Goal) => {
-    setGoalList([...goalList, goal]);
+    dispatch(addGoal(goal));
   };
 
   const handleUpdateGoal = (goal: Goal) => {
-    setGoalList(goalList.map((g) => (g.id === goal.id ? goal : g)));
+    dispatch(updateGoal(goal));
     setGoalToEdit(null);
   };
 
   const handleDeleteGoal = async (goalId: string) => {
-    await withAuthenticatedUser(async (userId) => {
-      try {
-        await deleteDoc(doc(db, `users/${userId}/goals`, goalId));
-        setGoalList(goalList.filter((goal) => goal.id !== goalId));
-        setIsDeleteModalOpen(false);
-      } catch (error) {
-        console.error("Error deleting goal:", error);
-      }
-    });
+    dispatch(deleteGoal(goalId));
+    setIsDeleteModalOpen(false);
   };
 
   const handleEditGoal = (goal: Goal) => {
@@ -97,14 +84,7 @@ const Goals: React.FC = () => {
       amount: goalToAddValue.amount + addValueAmount,
     };
 
-    await withAuthenticatedUser(async (userId) => {
-      const goalDocRef = doc(db, `users/${userId}/goals`, goalToAddValue.id);
-      await updateDoc(goalDocRef, { amount: updatedGoal.amount });
-      setGoalList(
-        goalList.map((g) => (g.id === updatedGoal.id ? updatedGoal : g))
-      );
-    });
-
+    handleUpdateGoal(updatedGoal);
     setIsAddValueModalOpen(false);
     setGoalToAddValue(null);
     setAddValueAmount(0);
@@ -136,7 +116,7 @@ const Goals: React.FC = () => {
 
             <div className="w-full rounded-md bg-dark-400 p-4 lg:w-2/3">
               <ul className="space-y-4">
-                {goalList.map((goal) => (
+                {goals.map((goal) => (
                   <li key={goal.id} className="rounded-md bg-dark-300 p-4">
                     <div className="mb-2 flex items-center justify-between space-x-4">
                       <div>
