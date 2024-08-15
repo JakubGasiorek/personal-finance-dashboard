@@ -7,16 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import useSidebar from "@/hooks/useSidebar";
 import useAuth from "@/hooks/useAuth";
 import GoalForm from "@/components/forms/GoalForm";
-import { db } from "@/services/firebase";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  updateDoc,
-} from "firebase/firestore";
 import { Goal } from "@/types";
-import { withAuthenticatedUser } from "@/lib/utils";
 import ProgressBarChart from "@/components/charts/ProgressBarChart";
 import Modal from "@/components/Modal";
 import { Input } from "@/components/ui/input";
@@ -36,7 +27,6 @@ const Goals: React.FC = () => {
   const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null);
   const [goalToAddValue, setGoalToAddValue] = useState<Goal | null>(null);
-  const [goalList, setGoalList] = useState<Goal[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddValueModalOpen, setIsAddValueModalOpen] = useState(false);
   const [addValueAmount, setAddValueAmount] = useState<number>(0);
