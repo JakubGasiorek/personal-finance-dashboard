@@ -95,3 +95,21 @@ export interface GoalsState {
   loading: boolean;
   error: string | null;
 }
+
+export interface IncomeState {
+  income: Income[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface ExpenseState {
+  expense: Expense[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface SummaryState {
+  summary: Summary | null;
+  loading: boolean;
+  error: string | null;
+}
