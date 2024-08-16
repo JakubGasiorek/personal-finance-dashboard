@@ -1,130 +1,93 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import {
+  fetchIncome,
+  addIncome,
+  updateIncome,
+  deleteIncome,
+} from "@/store/incomeSlice";
+import {
+  fetchExpense,
+  addExpense,
+  updateExpense,
+  deleteExpense,
+} from "@/store/expenseSlice";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import IncomeForm from "@/components/forms/IncomeForm";
 import ExpenseForm from "@/components/forms/ExpenseForm";
-import useFinancialData from "@/hooks/useFinancialData";
-import useSidebar from "@/hooks/useSidebar";
-import useAuth from "@/hooks/useAuth";
-import { FinancialData, Income, Expense } from "@/types";
-import { db } from "@/services/firebase";
-import { deleteDoc, doc } from "firebase/firestore";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import Modal from "@/components/Modal";
 import IncomeChart from "@/components/charts/IncomeChart";
 import ExpenseChart from "@/components/charts/ExpenseChart";
-import TransactionHistory from "@/components/TransactionHistory";
 import PaginatedList from "@/components/PaginatedList";
-import { withAuthenticatedUser } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import useSidebar from "@/hooks/useSidebar";
+import useAuth from "@/hooks/useAuth";
+import TransactionHistory from "@/components/TransactionHistory";
+import { Income, Expense } from "@/types";
 
 const ITEMS_PER_PAGE = 3;
 
-const Dashboard = () => {
-  const [loading, setLoading] = useState(true);
-  const [incomeToEdit, setIncomeToEdit] = useState<Income | null>(null);
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
-  const [financialData, setFinancialData] = useState<FinancialData>({
-    summary: [],
-    income: [],
-    expenses: [],
-  });
+const Dashboard: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const income = useSelector((state: RootState) => state.income.income);
+  const expenses = useSelector((state: RootState) => state.expense.expense);
+  const incomeLoading = useSelector((state: RootState) => state.income.loading);
+  const expenseLoading = useSelector(
+    (state: RootState) => state.expense.loading
+  );
 
   const { isSidebarOpen, toggleSidebar } = useSidebar();
   const { logout } = useAuth();
 
-  // State for toggling sections
-  const [showIncome, setShowIncome] = useState(true);
-  const [showExpenses, setShowExpenses] = useState(true);
-
-  // State for modal
+  const [incomeToEdit, setIncomeToEdit] = useState<Income | null>(null);
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [incomeIdToDelete, setIncomeIdToDelete] = useState<string | null>(null);
   const [expenseIdToDelete, setExpenseIdToDelete] = useState<string | null>(
     null
   );
-
-  // Define color maps
-  const incomeColorMap: Record<string, string> = {};
-  const expenseColorMap: Record<string, string> = {};
-
-  const data = useFinancialData();
+  const [showIncome, setShowIncome] = useState(true);
+  const [showExpenses, setShowExpenses] = useState(true);
 
   useEffect(() => {
-    setFinancialData(data);
-    setLoading(false);
-  }, [data]);
+    dispatch(fetchIncome());
+    dispatch(fetchExpense());
+  }, [dispatch]);
 
-  const handleIncomeAdded = (newIncome: Income) => {
-    setFinancialData((prev) => ({
-      ...prev,
-      income: [...prev.income, newIncome],
-    }));
-  };
+  const handleIncomeAdded = (newIncome: Income) =>
+    dispatch(addIncome(newIncome));
 
-  const handleExpenseAdded = (newExpense: Expense) => {
-    setFinancialData((prev) => ({
-      ...prev,
-      expenses: [...prev.expenses, newExpense],
-    }));
-  };
+  const handleExpenseAdded = (newExpense: Expense) =>
+    dispatch(addExpense(newExpense));
 
   const handleIncomeUpdated = (updatedIncome: Income) => {
-    setFinancialData((prev) => ({
-      ...prev,
-      income: prev.income.map((income) =>
-        income.id === updatedIncome.id ? updatedIncome : income
-      ),
-    }));
+    dispatch(updateIncome(updatedIncome));
     setIncomeToEdit(null);
   };
 
   const handleExpenseUpdated = (updatedExpense: Expense) => {
-    setFinancialData((prev) => ({
-      ...prev,
-      expenses: prev.expenses.map((expense) =>
-        expense.id === updatedExpense.id ? updatedExpense : expense
-      ),
-    }));
+    dispatch(updateExpense(updatedExpense));
     setExpenseToEdit(null);
   };
 
-  const handleEditCancel = () => {
-    setIncomeToEdit(null);
-    setExpenseToEdit(null);
+  const handleDeleteIncome = () => {
+    if (incomeIdToDelete) {
+      dispatch(deleteIncome(incomeIdToDelete));
+      setIsModalOpen(false);
+    }
   };
 
-  const handleDeleteIncome = async (incomeId: string) => {
-    await withAuthenticatedUser(async (userId) => {
-      try {
-        await deleteDoc(doc(db, `users/${userId}/income`, incomeId));
-        setFinancialData((prev) => ({
-          ...prev,
-          income: prev.income.filter((income) => income.id !== incomeId),
-        }));
-        setIsModalOpen(false); // Close the modal after deletion
-      } catch (error) {
-        console.error("Error deleting income:", error);
-      }
-    });
-  };
-
-  const handleDeleteExpense = async (expenseId: string) => {
-    await withAuthenticatedUser(async (userId) => {
-      try {
-        await deleteDoc(doc(db, `users/${userId}/expenses`, expenseId));
-        setFinancialData((prev) => ({
-          ...prev,
-          expenses: prev.expenses.filter((expense) => expense.id !== expenseId),
-        }));
-        setIsModalOpen(false); // Close the modal after deletion
-      } catch (error) {
-        console.error("Error deleting expense:", error);
-      }
-    });
+  const handleDeleteExpense = () => {
+    if (expenseIdToDelete) {
+      dispatch(deleteExpense(expenseIdToDelete));
+      setIsModalOpen(false);
+    }
   };
 
   const openDeleteModal = (id: string, type: "income" | "expense") => {
@@ -142,7 +105,7 @@ const Dashboard = () => {
     setExpenseIdToDelete(null);
   };
 
-  if (loading) {
+  if (incomeLoading || expenseLoading) {
     return (
       <div className="flex h-screen justify-center items-center text-white">
         Loading...
@@ -150,12 +113,9 @@ const Dashboard = () => {
     );
   }
 
-  const totalIncome = financialData.income.reduce(
-    (acc, item) => acc + item.amount,
-    0
-  );
-  const totalExpenses = financialData.expenses.reduce(
-    (acc, item) => acc + item.amount,
+  const totalIncome = income.reduce((acc, item) => acc + (item.amount || 0), 0);
+  const totalExpenses = expenses.reduce(
+    (acc, item) => acc + (item.amount || 0),
     0
   );
   const netBalance = totalIncome - totalExpenses;
@@ -181,18 +141,16 @@ const Dashboard = () => {
                 <p>Total Expenses: ${totalExpenses.toFixed(2)}</p>
                 <p>Net Balance: ${netBalance.toFixed(2)}</p>
               </div>
-              <TransactionHistory financialData={financialData} />
+              <TransactionHistory />
             </div>
+
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Income</h2>
-              <IncomeChart
-                incomeData={financialData.income}
-                colorMap={incomeColorMap}
-              />
+              <IncomeChart />
               <IncomeForm
                 onIncomeAdded={handleIncomeAdded}
                 incomeToEdit={incomeToEdit}
-                onEditCancel={handleEditCancel}
+                onEditCancel={() => setIncomeToEdit(null)}
                 onIncomeUpdated={handleIncomeUpdated}
               />
               <button
@@ -209,7 +167,7 @@ const Dashboard = () => {
               {showIncome && (
                 <div className="mt-4">
                   <PaginatedList
-                    items={financialData.income}
+                    items={income}
                     itemsPerPage={ITEMS_PER_PAGE}
                     renderItem={(income) => (
                       <div
@@ -243,16 +201,14 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Expenses</h2>
-              <ExpenseChart
-                expenseData={financialData.expenses}
-                colorMap={expenseColorMap}
-              />
+              <ExpenseChart />
               <ExpenseForm
                 onExpenseAdded={handleExpenseAdded}
                 expenseToEdit={expenseToEdit}
-                onEditCancel={handleEditCancel}
+                onEditCancel={() => setExpenseToEdit(null)}
                 onExpenseUpdated={handleExpenseUpdated}
               />
               <button
@@ -269,7 +225,7 @@ const Dashboard = () => {
               {showExpenses && (
                 <div className="mt-4">
                   <PaginatedList
-                    items={financialData.expenses}
+                    items={expenses}
                     itemsPerPage={ITEMS_PER_PAGE}
                     renderItem={(expense) => (
                       <div
@@ -306,12 +262,13 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
       <Modal
         isOpen={isModalOpen}
         onClose={closeDeleteModal}
         onConfirm={() => {
-          if (incomeIdToDelete) handleDeleteIncome(incomeIdToDelete);
-          if (expenseIdToDelete) handleDeleteExpense(expenseIdToDelete);
+          if (incomeIdToDelete) handleDeleteIncome();
+          if (expenseIdToDelete) handleDeleteExpense();
         }}
         title="Confirm Deletion"
         message={`Are you sure you want to delete this ${
