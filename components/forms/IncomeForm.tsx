@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/services/firebase";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,79 +19,68 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IncomeFormValidation } from "@/lib/validation";
 import { IncomeFormProps } from "@/types";
-import { withAuthenticatedUser } from "@/lib/utils";
+import { addIncome, updateIncome } from "@/store/incomeSlice";
+import { AppDispatch, RootState } from "@/store/store";
 
-const IncomeForm = ({
-  onIncomeAdded,
-  incomeToEdit = null,
-  onEditCancel,
-  onIncomeUpdated,
-}: IncomeFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+const IncomeForm = ({ incomeToEdit = null, onEditCancel }: IncomeFormProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.income);
 
   const form = useForm<z.infer<typeof IncomeFormValidation>>({
     resolver: zodResolver(IncomeFormValidation),
-    defaultValues: incomeToEdit || {
-      source: "",
-      amount: 0,
-      date: new Date(),
-    },
+    defaultValues: incomeToEdit
+      ? {
+          source: incomeToEdit.source || "",
+          amount: incomeToEdit.amount || 0,
+          date: incomeToEdit.date ? new Date(incomeToEdit.date) : new Date(), // Ensure date is a Date object
+        }
+      : {
+          source: "",
+          amount: 0,
+          date: new Date(),
+        },
   });
 
   useEffect(() => {
     if (incomeToEdit) {
       form.reset({
-        ...incomeToEdit,
-        date: incomeToEdit.date ? new Date(incomeToEdit.date) : new Date(),
+        source: incomeToEdit.source || "",
+        amount: incomeToEdit.amount || 0,
+        date: incomeToEdit.date ? new Date(incomeToEdit.date) : new Date(), // Ensure date is a Date object
       });
     }
-  }, [incomeToEdit]);
+  }, [incomeToEdit, form]);
 
   const handleAddIncome = async (
     data: z.infer<typeof IncomeFormValidation>
   ) => {
-    setIsLoading(true);
-    try {
-      const parsedData = {
-        ...data,
-        amount:
-          typeof data.amount === "string"
-            ? parseFloat(data.amount)
-            : data.amount,
-        date: data.date ? new Date(data.date) : new Date(),
-      };
+    const parsedData = {
+      ...data,
+      amount:
+        typeof data.amount === "string" ? parseFloat(data.amount) : data.amount,
+      date: data.date ? data.date.toISOString() : new Date().toISOString(), // Convert to ISO string
+    };
 
-      await withAuthenticatedUser(async (userId) => {
-        if (incomeToEdit && incomeToEdit.id) {
-          // Update existing income
-          const incomeDocRef = doc(
-            db,
-            `users/${userId}/income`,
-            incomeToEdit.id
-          );
-          await updateDoc(incomeDocRef, parsedData);
-          if (onIncomeUpdated) {
-            onIncomeUpdated({ ...parsedData, id: incomeToEdit.id });
-          }
-        } else {
-          // Add new income
-          const docRef = await addDoc(
-            collection(db, `users/${userId}/income`),
-            parsedData
-          );
-          onIncomeAdded({ ...parsedData, id: docRef.id });
-        }
-      });
+    try {
+      if (incomeToEdit && incomeToEdit.id) {
+        // Update existing income
+        await dispatch(updateIncome({ ...parsedData, id: incomeToEdit.id }));
+      } else {
+        // Add new income
+        await dispatch(addIncome(parsedData));
+      }
 
       form.reset({
         source: "",
         amount: 0,
         date: new Date(),
       });
+
+      if (onEditCancel) {
+        onEditCancel();
+      }
     } catch (error) {
       console.error("Error adding/updating income:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -160,10 +148,10 @@ const IncomeForm = ({
         <div className="flex space-x-4">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
             className="btn-add-value w-full"
           >
-            {isLoading
+            {loading
               ? incomeToEdit
                 ? "Updating Income..."
                 : "Adding Income..."
@@ -190,6 +178,7 @@ const IncomeForm = ({
             </Button>
           )}
         </div>
+        {error && <p className="text-red-500">{error}</p>}
       </form>
     </Form>
   );

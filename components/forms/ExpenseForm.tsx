@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/services/firebase";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,23 +19,29 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ExpenseFormValidation } from "@/lib/validation";
 import { ExpenseFormProps } from "@/types";
-import { withAuthenticatedUser } from "@/lib/utils";
+import { addExpense, updateExpense } from "@/store/expenseSlice";
+import { AppDispatch, RootState } from "@/store/store";
 
 const ExpenseForm = ({
-  onExpenseAdded,
   expenseToEdit = null,
   onEditCancel,
-  onExpenseUpdated,
 }: ExpenseFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.expense);
 
   const form = useForm<z.infer<typeof ExpenseFormValidation>>({
     resolver: zodResolver(ExpenseFormValidation),
-    defaultValues: expenseToEdit || {
-      category: "",
-      amount: 0,
-      date: new Date(),
-    },
+    defaultValues: expenseToEdit
+      ? {
+          category: expenseToEdit.category || "",
+          amount: expenseToEdit.amount || 0,
+          date: expenseToEdit.date ? new Date(expenseToEdit.date) : new Date(),
+        }
+      : {
+          category: "",
+          amount: 0,
+          date: new Date(),
+        },
   });
 
   useEffect(() => {
@@ -46,12 +51,11 @@ const ExpenseForm = ({
         date: expenseToEdit.date ? new Date(expenseToEdit.date) : new Date(),
       });
     }
-  }, [expenseToEdit]);
+  }, [expenseToEdit, form]);
 
   const handleAddExpense = async (
     data: z.infer<typeof ExpenseFormValidation>
   ) => {
-    setIsLoading(true);
     try {
       const parsedData = {
         ...data,
@@ -59,40 +63,28 @@ const ExpenseForm = ({
           typeof data.amount === "string"
             ? parseFloat(data.amount)
             : data.amount,
-        date: data.date ? new Date(data.date) : new Date(),
+        date: data.date ? data.date.toISOString() : new Date().toISOString(),
       };
 
-      await withAuthenticatedUser(async (userId) => {
-        if (expenseToEdit && expenseToEdit.id) {
-          // Update existing expense
-          const expenseDocRef = doc(
-            db,
-            `users/${userId}/expenses`,
-            expenseToEdit.id
-          );
-          await updateDoc(expenseDocRef, parsedData);
-          if (onExpenseUpdated) {
-            onExpenseUpdated({ ...parsedData, id: expenseToEdit.id });
-          }
-        } else {
-          // Add new expense
-          const docRef = await addDoc(
-            collection(db, `users/${userId}/expenses`),
-            parsedData
-          );
-          onExpenseAdded({ ...parsedData, id: docRef.id });
-        }
-      });
+      if (expenseToEdit && expenseToEdit.id) {
+        // Update existing expense
+        await dispatch(updateExpense({ ...parsedData, id: expenseToEdit.id }));
+      } else {
+        // Add new expense
+        await dispatch(addExpense(parsedData));
+      }
 
       form.reset({
         category: "",
         amount: 0,
         date: new Date(),
       });
+
+      if (onEditCancel) {
+        onEditCancel();
+      }
     } catch (error) {
       console.error("Error adding/updating expense:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -160,10 +152,10 @@ const ExpenseForm = ({
         <div className="flex space-x-4">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
             className="btn-add-value w-full"
           >
-            {isLoading
+            {loading
               ? expenseToEdit
                 ? "Updating Expense..."
                 : "Adding Expense..."
@@ -190,6 +182,7 @@ const ExpenseForm = ({
             </Button>
           )}
         </div>
+        {error && <p className="text-red-500">{error}</p>}
       </form>
     </Form>
   );
