@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { Input } from "@/components/ui/input";
 import DatePicker from "react-datepicker";
-import { Transaction, TransactionHistoryProps } from "@/types";
 import PaginatedList from "@/components/PaginatedList";
+import { Transaction } from "@/types";
 
 const ITEMS_PER_PAGE = 6;
 
-const TransactionHistory: React.FC<TransactionHistoryProps> = ({
-  financialData,
-}) => {
+const TransactionHistory: React.FC = () => {
+  const income = useSelector((state: RootState) => state.income.income);
+  const expenses = useSelector((state: RootState) => state.expense.expense);
+
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[]
   >([]);
@@ -17,10 +20,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   const [filter, setFilter] = useState<string>("");
 
   useEffect(() => {
-    let filtered: Transaction[] = [
-      ...financialData.income,
-      ...financialData.expenses,
-    ];
+    let filtered: Transaction[] = [...income, ...expenses];
 
     if (startDate) {
       filtered = filtered.filter(
@@ -47,7 +47,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
     }
 
     setFilteredTransactions(filtered);
-  }, [startDate, endDate, filter, financialData]);
+  }, [startDate, endDate, filter, income, expenses]);
 
   return (
     <div className="py-4 bg-dark-400 rounded-md w-full">
