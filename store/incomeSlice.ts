@@ -10,6 +10,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 
 const initialState: IncomeState = {
   income: [],
@@ -17,34 +18,42 @@ const initialState: IncomeState = {
   error: null,
 };
 
-// Fetch income
+// Convert date to ISO string
+const serializeDate = (date: Date) => date.toISOString();
+
 export const fetchIncome = createAsyncThunk("income/fetchIncome", async () => {
   return await withAuthenticatedUser(async (userId) => {
     const incomeSnapshot = await getDocs(
       collection(db, `users/${userId}/income`)
     );
-    return incomeSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Income[];
+    return incomeSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        source: data.source,
+        amount: data.amount,
+        date:
+          data.date instanceof Timestamp
+            ? serializeDate(data.date.toDate())
+            : data.date, // Convert Timestamp to ISO string
+      } as Income;
+    });
   });
 });
 
-// Add income
 export const addIncome = createAsyncThunk(
   "income/addIncome",
   async (incomeData: Omit<Income, "id">) => {
     return await withAuthenticatedUser(async (userId) => {
-      const docRef = await addDoc(
-        collection(db, `users/${userId}/income`),
-        incomeData
-      );
+      const docRef = await addDoc(collection(db, `users/${userId}/income`), {
+        ...incomeData,
+        date: serializeDate(new Date(incomeData.date)), // Convert date to ISO string
+      });
       return { ...incomeData, id: docRef.id };
     });
   }
 );
 
-// Update income
 export const updateIncome = createAsyncThunk(
   "income/updateIncome",
   async (income: Income) => {
@@ -53,15 +62,14 @@ export const updateIncome = createAsyncThunk(
       const incomeData = {
         source: income.source,
         amount: income.amount,
-        date: income.date,
+        date: serializeDate(new Date(income.date)), // Convert date to ISO string
       };
       await updateDoc(incomeDocRef, incomeData);
-      return income;
+      return { ...income, date: new Date(income.date).toISOString() }; // Return date as ISO string
     });
   }
 );
 
-// Delete income
 export const deleteIncome = createAsyncThunk(
   "income/deleteIncome",
   async (incomeId: string) => {
