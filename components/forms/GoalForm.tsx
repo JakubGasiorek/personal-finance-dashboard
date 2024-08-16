@@ -23,7 +23,6 @@ import { addGoal, updateGoal } from "@/store/goalsSlice";
 const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.goals);
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof GoalFormValidation>>({
     resolver: zodResolver(GoalFormValidation),
@@ -42,15 +41,10 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
   }, [goalToEdit]);
 
   const handleAddGoal = async (data: z.infer<typeof GoalFormValidation>) => {
-    setIsLoading(true);
     const parsedData = {
       ...data,
-      amount:
-        typeof data.amount === "string" ? parseFloat(data.amount) : data.amount,
-      amountNeeded:
-        typeof data.amountNeeded === "string"
-          ? parseFloat(data.amountNeeded)
-          : data.amountNeeded,
+      amount: parseFloat(data.amount.toString()),
+      amountNeeded: parseFloat(data.amountNeeded.toString()),
     };
 
     try {
@@ -61,13 +55,10 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
         // Add new goal
         await dispatch(addGoal(parsedData));
       }
-
       form.reset({ title: "", description: "", amountNeeded: 0, amount: 0 });
       if (onEditCancel) onEditCancel();
     } catch (error) {
       console.error("Error adding/updating goal:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -112,11 +103,11 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Starting amount</FormLabel>
+              <FormLabel>Starting Amount</FormLabel>
               <FormControl className="rounded-md border border-dark-500 bg-dark-400">
                 <Input
                   type="number"
-                  placeholder="Starting amount"
+                  placeholder="Starting Amount"
                   {...field}
                   onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   value={field.value}
@@ -132,11 +123,11 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
           name="amountNeeded"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Needed amount</FormLabel>
+              <FormLabel>Needed Amount</FormLabel>
               <FormControl className="rounded-md border border-dark-500 bg-dark-400">
                 <Input
                   type="number"
-                  placeholder="Needed amount"
+                  placeholder="Needed Amount"
                   {...field}
                   onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   value={field.value}
@@ -150,10 +141,10 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
         <div className="flex space-x-4">
           <Button
             type="submit"
-            disabled={isLoading || loading}
+            disabled={loading}
             className="btn-add-value w-full"
           >
-            {isLoading || loading
+            {loading
               ? goalToEdit
                 ? "Updating Goal..."
                 : "Adding Goal..."
@@ -171,9 +162,7 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
                   amountNeeded: 0,
                   amount: 0,
                 });
-                if (onEditCancel) {
-                  onEditCancel();
-                }
+                if (onEditCancel) onEditCancel();
               }}
               className="btn-delete w-full"
             >
