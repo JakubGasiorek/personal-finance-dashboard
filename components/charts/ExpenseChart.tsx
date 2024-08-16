@@ -8,21 +8,30 @@ import {
   Legend,
   TooltipItem,
 } from "chart.js";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { getColorForCategory } from "@/lib/colors";
-import { ExpenseChartProps } from "@/types";
 
 ChartJS.register(ArcElement, Tooltip, Title, Legend);
 
-const ExpenseChart: React.FC<ExpenseChartProps> = ({
-  expenseData,
-  colorMap,
-}) => {
+const ExpenseChart: React.FC = () => {
+  // Access expense data from Redux store
+  const expenseData = useSelector((state: RootState) => state.expense.expense);
+
+  // Define color map for categories
+  const expenseColorMap: Record<string, string> = {};
+  expenseData.forEach((expenseItem) => {
+    getColorForCategory(expenseItem.category, expenseColorMap);
+  });
+
+  // Aggregate expense data by category
   const categories = expenseData.reduce((acc, expense) => {
     const key = expense.category || "Uncategorized";
     acc[key] = (acc[key] || 0) + expense.amount;
     return acc;
   }, {} as Record<string, number>);
 
+  // Define chart data
   const data = {
     labels: Object.keys(categories),
     datasets: [
@@ -30,12 +39,13 @@ const ExpenseChart: React.FC<ExpenseChartProps> = ({
         label: "Expenses",
         data: Object.values(categories),
         backgroundColor: Object.keys(categories).map((category) =>
-          getColorForCategory(category, colorMap)
+          getColorForCategory(category, expenseColorMap)
         ),
       },
     ],
   };
 
+  // Define chart options
   const options = {
     responsive: true,
     plugins: {

@@ -9,12 +9,23 @@ import {
   Title,
   TooltipItem,
 } from "chart.js";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { getColorForCategory } from "@/lib/colors";
-import { IncomeChartProps } from "@/types";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Title);
 
-const IncomeChart: React.FC<IncomeChartProps> = ({ incomeData, colorMap }) => {
+const IncomeChart: React.FC = () => {
+  // Access income data from Redux store
+  const incomeData = useSelector((state: RootState) => state.income.income);
+
+  // Define color map for categories
+  const incomeColorMap: Record<string, string> = {};
+  incomeData.forEach((incomeItem) => {
+    getColorForCategory(incomeItem.source, incomeColorMap);
+  });
+
+  // Aggregate income data by category
   const categories = incomeData.reduce((acc, income) => {
     const key = income.source || "Uncategorized";
     acc[key] = (acc[key] || 0) + income.amount;
@@ -28,7 +39,7 @@ const IncomeChart: React.FC<IncomeChartProps> = ({ incomeData, colorMap }) => {
         label: "Income",
         data: Object.values(categories),
         backgroundColor: Object.keys(categories).map((category) =>
-          getColorForCategory(category, colorMap)
+          getColorForCategory(category, incomeColorMap)
         ),
       },
     ],
