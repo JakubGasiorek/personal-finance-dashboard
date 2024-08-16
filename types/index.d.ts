@@ -8,30 +8,17 @@ export interface Income {
   id: string;
   source: string;
   amount: number;
-  date: Date;
+  date: string;
 }
 
 export interface Expense {
   id: string;
   category: string;
   amount: number;
-  date: Date;
-}
-
-export interface Summary {
-  id: string;
-  netBalance: number;
-  totalExpenses: number;
-  totalIncome: number;
+  date: string;
 }
 
 export type Transaction = Income | Expense;
-
-export interface FinancialData {
-  summary: Summary[];
-  income: Income[];
-  expenses: Expense[];
-}
 
 export interface IncomeFormProps {
   onIncomeAdded: (income: Income) => void;
@@ -53,20 +40,6 @@ export interface ModalProps {
   onConfirm: () => void;
   title: string;
   message: React.ReactNode;
-}
-
-export interface IncomeChartProps {
-  incomeData: FinancialData["income"];
-  colorMap: Record<string, string>;
-}
-
-export interface ExpenseChartProps {
-  expenseData: FinancialData["expenses"];
-  colorMap: Record<string, string>;
-}
-
-export interface TransactionHistoryProps {
-  financialData: FinancialData;
 }
 
 export interface PaginatedListProps<T> {
@@ -104,12 +77,6 @@ export interface IncomeState {
 
 export interface ExpenseState {
   expense: Expense[];
-  loading: boolean;
-  error: string | null;
-}
-
-export interface SummaryState {
-  summary: Summary | null;
   loading: boolean;
   error: string | null;
 }
