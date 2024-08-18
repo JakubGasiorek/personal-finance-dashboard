@@ -1,3 +1,9 @@
+export interface SignUpParams {
+  email: string;
+  password: string;
+  name: string;
+}
+
 export interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;

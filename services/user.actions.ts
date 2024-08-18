@@ -1,12 +1,7 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc, Timestamp } from "firebase/firestore";
 import { auth, db } from "@/services/firebase";
-
-interface SignUpParams {
-  email: string;
-  password: string;
-  name: string;
-}
+import { SignUpParams } from "@/types";
 
 export async function signUpUser({ email, password, name }: SignUpParams) {
   try {
