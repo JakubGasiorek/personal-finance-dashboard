@@ -1,5 +1,6 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} **/
-export default {
+import type { Config } from "jest";
+
+const config: Config = {
   preset: "ts-jest",
   testEnvironment: "jsdom",
   moduleNameMapper: {
@@ -8,6 +9,14 @@ export default {
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   setupFiles: ["<rootDir>/__mocks__/firebase.ts"],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.json",
+      },
+    ],
   },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
+
+export default config;
