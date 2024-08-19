@@ -10,6 +10,8 @@ const mockGetFirestore = jest.fn();
 
 // Create mock function for Auth methods
 const mockGetAuth = jest.fn();
+const mockSignInWithEmailAndPassword = jest.fn();
+const mockSendPasswordResetEmail = jest.fn();
 
 // Mock Firebase Firestore module
 jest.mock("firebase/firestore", () => ({
@@ -27,10 +29,13 @@ jest.mock("firebase/firestore", () => ({
 // Mock Firebase Auth module
 jest.mock("firebase/auth", () => ({
   getAuth: mockGetAuth,
+  signInWithEmailAndPassword: mockSignInWithEmailAndPassword,
+  sendPasswordResetEmail: mockSendPasswordResetEmail,
 }));
 
 // Mock utility functions
 jest.mock("@/lib/utils", () => ({
+  cn: jest.fn((...inputs) => inputs.join(" ")),
   withAuthenticatedUser: (fn: any) => fn("mockUserId"),
 }));
 
@@ -44,5 +49,7 @@ export {
   mockDoc,
   mockSetDoc,
   mockGetAuth,
+  mockSignInWithEmailAndPassword,
+  mockSendPasswordResetEmail,
   mockGetFirestore,
 };
