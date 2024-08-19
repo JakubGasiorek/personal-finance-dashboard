@@ -29,6 +29,10 @@ describe("incomeSlice async thunks", () => {
     mockGetFirestore.mockReturnValue({});
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should fetch income and update state correctly", async () => {
     // Arrange: Mock data returned from Firebase
     const mockIncomeDocs = [
