@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SignInForm from "../components/forms/SignInForm";
 import SignUpForm from "../components/forms/SignUpForm";
+import { Button } from "@/components/ui/button";
 
 const Home = () => {
   const [isSigningIn, setIsSigningIn] = useState(true);
@@ -41,14 +42,14 @@ const Home = () => {
           <SignUpForm onSignUpSuccess={handleSignUpSuccess} />
         )}
 
-        <button
+        <Button
           onClick={toggleForm}
-          className="mt-4 text-blue-500 hover:underline"
+          className="-ml-4 text-blue-500 hover:underline"
         >
           {isSigningIn
             ? "Don't have an account? Sign up"
             : "Already have an account? Sign in"}
-        </button>
+        </Button>
 
         <p className="copyright mt-4 py-4">© 2024 FinTrack</p>
       </div>

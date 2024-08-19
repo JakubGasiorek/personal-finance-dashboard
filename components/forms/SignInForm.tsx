@@ -16,11 +16,15 @@ import { Input } from "@/components/ui/input";
 import { UserFormValidation } from "@/lib/validation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "@/services/firebase";
 
 const SignInForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof UserFormValidation>>({
@@ -51,6 +55,32 @@ const SignInForm = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleResetPassword() {
+    const email = form.getValues("email");
+    if (!email) {
+      form.setError("email", {
+        type: "manual",
+        message: "Please enter your email to reset your password",
+      });
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Please check your inbox.");
+    } catch (error) {
+      console.error(error);
+      form.setError("email", {
+        type: "manual",
+        message: "Failed to send reset email. Please try again",
+      });
+      return;
+    } finally {
+      setIsResetting(false);
     }
   }
 
@@ -89,6 +119,15 @@ const SignInForm = () => {
           className="bg-green-800 hover:bg-green-600 w-full"
         >
           {isLoading ? "Signing in..." : "Sign in"}
+        </Button>
+
+        <Button
+          type="button"
+          onClick={handleResetPassword}
+          disabled={isResetting}
+          className="-ml-4 text-blue-500 hover:underline"
+        >
+          {isResetting ? "Sending reset email..." : "Forgot your password?"}
         </Button>
       </form>
     </Form>
