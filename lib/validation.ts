@@ -17,10 +17,8 @@ export const RegistrationFormValidation = z
   });
 
 export const UserFormValidation = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+  email: z.string().email("Invalid email or password"),
+  password: z.string().min(6, { message: "Invalid email or password" }),
 });
 
 export const IncomeFormValidation = z.object({
