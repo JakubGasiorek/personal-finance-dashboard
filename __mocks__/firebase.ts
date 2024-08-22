@@ -9,7 +9,7 @@ const mockSetDoc = jest.fn();
 const mockGetFirestore = jest.fn();
 
 // Create mock function for Auth methods
-const mockGetAuth = jest.fn();
+const mockGetAuth = jest.fn().mockReturnValue({});
 const mockSignInWithEmailAndPassword = jest.fn();
 const mockSendPasswordResetEmail = jest.fn();
 
