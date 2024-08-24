@@ -113,22 +113,25 @@ const SignInForm = () => {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="bg-green-800 hover:bg-green-600 w-full"
-        >
-          {isLoading ? "Signing in..." : "Sign in"}
-        </Button>
+        <div className="text-left">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="bg-green-800 hover:bg-green-600 w-full"
+          >
+            {isLoading ? "Signing in..." : "Sign in"}
+          </Button>
 
-        <Button
-          type="button"
-          onClick={handleResetPassword}
-          disabled={isResetting}
-          className="-ml-4 text-blue-500 hover:underline"
-        >
-          {isResetting ? "Sending reset email..." : "Forgot your password?"}
-        </Button>
+          <Button
+            type="button"
+            onClick={handleResetPassword}
+            variant="link"
+            disabled={isResetting}
+            className="-mx-4 mt-4 -mb-4 text-green-400 hover:text-green-300 text-wrap"
+          >
+            {isResetting ? "Sending reset email..." : "Forgot your password?"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

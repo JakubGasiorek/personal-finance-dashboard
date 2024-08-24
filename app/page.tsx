@@ -22,37 +22,41 @@ const Home = () => {
   };
 
   return (
-    <div className="text-white flex-center h-screen max-h-screen mx-6">
-      <div>
-        <h1 className="text-2xl my-4">
-          {isSigningIn
-            ? "Sign in to your personal finance dashboard"
-            : "Sign up for a personal finance dashboard account"}
-        </h1>
+    <div className="min-h-screen px-4 flex-center text-white bg-gradient-to-b from-dark-300 via-dark-400 to-dark-300">
+      <div className="bg-gradient-to-b from-green-700 via-green-900 to-green-700 rounded-xl">
+        <div className="bg-dark-300 md:p-8 p-6 m-2 rounded-xl">
+          <h1 className="header text-center text-white mb-6">
+            {isSigningIn
+              ? "Welcome Back to FinTrack"
+              : "Create Your FinTrack Account"}
+          </h1>
 
-        {signUpSuccess && !isSigningIn && (
-          <p className="text-green-400 mb-4">
-            Sign up successful! Redirecting to sign in...
-          </p>
-        )}
+          {signUpSuccess && !isSigningIn && (
+            <p className="text-green-400 text-center mb-4">
+              Sign up successful! Redirecting to sign in...
+            </p>
+          )}
 
-        {isSigningIn ? (
-          <SignInForm />
-        ) : (
-          <SignUpForm onSignUpSuccess={handleSignUpSuccess} />
-        )}
+          {isSigningIn ? (
+            <SignInForm />
+          ) : (
+            <SignUpForm onSignUpSuccess={handleSignUpSuccess} />
+          )}
 
-        <Button
-          onClick={toggleForm}
-          className="-ml-4 text-blue-500 hover:underline"
-        >
-          {isSigningIn
-            ? "Don't have an account? Sign up"
-            : "Already have an account? Sign in"}
-        </Button>
-
-        <p className="copyright mt-4 py-4">© 2024 FinTrack</p>
+          <div className="text-left mt-4">
+            <Button
+              onClick={toggleForm}
+              variant="link"
+              className="text-green-400 hover:text-green-300 text-wrap -mx-4"
+            >
+              {isSigningIn
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Sign in"}
+            </Button>
+          </div>
+        </div>
       </div>
+      <p className="absolute bottom-4 text-gray-500 text-sm">© 2024 FinTrack</p>
     </div>
   );
 };

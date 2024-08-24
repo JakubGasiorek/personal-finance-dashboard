@@ -48,7 +48,7 @@
   }
 
   .header {
-    @apply text-32-bold md:text-36-bold;
+    @apply text-24-bold md:text-30-bold;
   }
 
   .sub-header {
@@ -80,8 +80,8 @@
     @apply text-[24px] leading-[28px] font-bold;
   }
 
-  .text-32-bold {
-    @apply text-[32px] leading-[36px] font-bold;
+  .text-30-bold {
+    @apply text-[30px] leading-[34px] font-bold;
   }
 
   .text-18-bold {
