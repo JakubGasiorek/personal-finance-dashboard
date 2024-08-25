@@ -17,12 +17,15 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
   progressPercentage,
 }) => {
   const data = {
-    labels: ["Progress"],
+    labels: [""],
     datasets: [
       {
-        label: "Progress",
+        label: "",
         data: [progressPercentage],
         backgroundColor: progressPercentage >= 100 ? "#4caf50" : "#2196f3",
+        borderRadius: 12,
+        borderWidth: 0,
+        borderSkipped: false,
       },
     ],
   };
@@ -32,23 +35,25 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
     scales: {
       x: {
         max: 100,
+        display: false,
+      },
+      y: {
+        display: false,
       },
     },
     plugins: {
       legend: {
         display: false,
       },
-    },
-    elements: {
-      bar: {
-        borderRadius: 5,
+      tooltip: {
+        enabled: false,
       },
     },
     maintainAspectRatio: false,
   };
 
   return (
-    <div className="w-full h-6 mb-2">
+    <div className="w-full h-6 mb-2 bg-dark-400 rounded-xl">
       <Bar data={data} options={options} />
     </div>
   );
