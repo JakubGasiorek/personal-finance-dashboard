@@ -1,4 +1,14 @@
+import { Goal } from "@/types";
 import { z } from "zod";
+
+export const amountValidation = z
+  .number({
+    invalid_type_error: "Amount must be a valid number",
+  })
+  .min(0, "Amount must be a positive number")
+  .refine((val) => !isNaN(val), {
+    message: "Expected a valid number, received nothing",
+  });
 
 export const RegistrationFormValidation = z
   .object({
@@ -23,7 +33,7 @@ export const UserFormValidation = z.object({
 
 export const IncomeFormValidation = z.object({
   source: z.string().nonempty("Source is required"),
-  amount: z.number().min(0, "Amount must be a positive number"),
+  amount: amountValidation,
   date: z
     .date()
     .nullable()
@@ -32,16 +42,40 @@ export const IncomeFormValidation = z.object({
 
 export const ExpenseFormValidation = z.object({
   category: z.string().nonempty("Category is required"),
-  amount: z.number().min(0, "Amount must be a positive number"),
+  amount: amountValidation,
   date: z
     .date()
     .nullable()
     .transform((val) => val || new Date()),
 });
 
-export const GoalFormValidation = z.object({
-  title: z.string().nonempty("Title is required"),
-  description: z.string().nonempty("Description is required"),
-  amount: z.number().min(0, "Amount must be a positive number"),
-  amountNeeded: z.number().min(1, "Needed amount must be greater than 0"),
-});
+const isTitleUnique = (title: string, goals: Goal[]) => {
+  return !goals.some(
+    (goal) => goal.title.toLowerCase() === title.toLowerCase()
+  );
+};
+
+export const GoalFormValidation = (goals: Goal[]) =>
+  z
+    .object({
+      title: z.string().nonempty("Title is required"),
+      description: z.string().nonempty("Description is required"),
+      amount: amountValidation,
+      amountNeeded: z
+        .number({
+          invalid_type_error: "Needed amount must be a valid number",
+        })
+        .min(1, "Needed amount must be greater than 0")
+        .refine((val) => !isNaN(val), {
+          message: "Expected a valid number, received NaN",
+        }),
+    })
+    .refine((data) => isTitleUnique(data.title, goals), {
+      message: "A goal with this title already exists.",
+      path: ["title"],
+    })
+    .refine((data) => data.amount <= data.amountNeeded, {
+      message:
+        "Needed amount must be higher than or equal to the current amount",
+      path: ["amountNeeded"],
+    });
