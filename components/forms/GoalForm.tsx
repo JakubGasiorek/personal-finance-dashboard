@@ -22,10 +22,12 @@ import { addGoal, updateGoal } from "@/store/goalsSlice";
 
 const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.goals);
+  const { goals, loading, error } = useSelector(
+    (state: RootState) => state.goals
+  );
 
-  const form = useForm<z.infer<typeof GoalFormValidation>>({
-    resolver: zodResolver(GoalFormValidation),
+  const form = useForm<z.infer<ReturnType<typeof GoalFormValidation>>>({
+    resolver: zodResolver(GoalFormValidation(goals)),
     defaultValues: goalToEdit || {
       title: "",
       description: "",
@@ -40,7 +42,9 @@ const GoalForm = ({ goalToEdit = null, onEditCancel }: GoalFormProps) => {
     }
   }, [goalToEdit]);
 
-  const handleAddGoal = async (data: z.infer<typeof GoalFormValidation>) => {
+  const handleAddGoal = async (
+    data: z.infer<ReturnType<typeof GoalFormValidation>>
+  ) => {
     const parsedData = {
       ...data,
       amount: parseFloat(data.amount.toString()),
