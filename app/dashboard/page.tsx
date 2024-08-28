@@ -30,6 +30,8 @@ import useSidebar from "@/hooks/useSidebar";
 import useAuth from "@/hooks/useAuth";
 import TransactionHistory from "@/components/TransactionHistory";
 import { Income, Expense } from "@/types";
+import { withAuthenticatedUser } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -55,10 +57,17 @@ const Dashboard: React.FC = () => {
   const [showIncome, setShowIncome] = useState(true);
   const [showExpenses, setShowExpenses] = useState(true);
 
+  const router = useRouter();
+
   useEffect(() => {
-    dispatch(fetchIncome());
-    dispatch(fetchExpense());
-  }, [dispatch]);
+    withAuthenticatedUser(async () => {
+      dispatch(fetchIncome());
+      dispatch(fetchExpense());
+    }).catch((error) => {
+      console.error("User is not authenticated:", error);
+      router.push("/"); // Redirect to login page if not authenticated
+    });
+  }, [dispatch, router]);
 
   const handleIncomeAdded = (newIncome: Income) =>
     dispatch(addIncome(newIncome));

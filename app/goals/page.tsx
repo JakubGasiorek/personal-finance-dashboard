@@ -19,6 +19,8 @@ import {
   fetchGoals,
   updateGoal,
 } from "@/store/goalsSlice";
+import { withAuthenticatedUser } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const Goals: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,9 +36,16 @@ const Goals: React.FC = () => {
   const { isSidebarOpen, toggleSidebar } = useSidebar();
   const { logout } = useAuth();
 
+  const router = useRouter();
+
   useEffect(() => {
-    dispatch(fetchGoals());
-  }, [dispatch]);
+    withAuthenticatedUser(async () => {
+      dispatch(fetchGoals());
+    }).catch((error) => {
+      console.error("User is not authenticated:", error);
+      router.push("/");
+    });
+  }, [dispatch, router]);
 
   const handleAddGoal = (goal: Goal) => {
     dispatch(addGoal(goal));
