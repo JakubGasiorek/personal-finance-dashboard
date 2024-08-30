@@ -27,11 +27,6 @@ The Personal Finance Management Dashboard is a web application designed to help 
   - Set monthly/annual budgets and track progress.
   - Create and monitor financial goals (e.g., saving for a vacation).
 
-- **Reports**
-
-  - Generate detailed reports on spending habits and income sources.
-  - Export reports as PDF or CSV.
-
 - **Responsive Design**
 
   - Fully responsive design ensuring the application works on various devices.
@@ -43,7 +38,7 @@ The Personal Finance Management Dashboard is a web application designed to help 
 - **Tailwind CSS**: For styling the application with a utility-first approach.
 - **Chart.js**: For creating interactive charts and graphs.
 - **Firebase**: For authentication, real-time database, and storage.
-- **Redux (or Context API)**: For state management.
+- **Redux**: For state management.
 - **TypeScript**: For type safety and better code quality.
 - **Jest & React Testing Library**: For testing components.
 - **Shadcn**: For form handling and validation.
