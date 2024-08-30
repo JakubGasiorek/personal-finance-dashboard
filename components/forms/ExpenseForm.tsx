@@ -100,9 +100,14 @@ const ExpenseForm = ({
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel htmlFor="category">Category</FormLabel>
                 <FormControl className="rounded-md border border-dark-500 bg-dark-400">
-                  <Input placeholder="Category" {...field} className="w-full" />
+                  <Input
+                    id="category"
+                    placeholder="Category"
+                    {...field}
+                    className="w-full"
+                  />
                 </FormControl>
                 <FormMessage className="text-red-400" />
               </FormItem>
@@ -113,9 +118,10 @@ const ExpenseForm = ({
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount</FormLabel>
+                <FormLabel htmlFor="amount">Amount</FormLabel>
                 <FormControl className="rounded-md border border-dark-500 bg-dark-400">
                   <Input
+                    id="amount"
                     type="number"
                     placeholder="Amount"
                     {...field}
@@ -134,14 +140,16 @@ const ExpenseForm = ({
           name="date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date</FormLabel>
+              <FormLabel htmlFor="date">Date</FormLabel>
               <FormControl>
                 <div className="flex flex-col">
                   <DatePicker
+                    id="date"
                     selected={field.value ? new Date(field.value) : null}
                     onChange={(date) => field.onChange(date)}
                     dateFormat="yyyy/MM/dd"
                     className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    popperPlacement="bottom-start"
                   />
                 </div>
               </FormControl>
