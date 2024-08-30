@@ -139,9 +139,6 @@ const Dashboard: React.FC = () => {
       <div>
         <Navbar toggleSidebar={toggleSidebar} />
         <div className="text-white my-8 px-4">
-          <h1 className="text-center text-xl xl:text-3xl mb-8">
-            Welcome to your dashboard
-          </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-dark-400 p-4 rounded-md lg:col-span-1 md:col-span-2">
               <h2 className="text-xl mb-4">Summary</h2>
@@ -152,7 +149,6 @@ const Dashboard: React.FC = () => {
               </div>
               <TransactionHistory />
             </div>
-
             <div className="bg-dark-400 p-4 rounded-md">
               <h2 className="text-xl mb-4">Income</h2>
               <IncomeChart />
@@ -164,7 +160,7 @@ const Dashboard: React.FC = () => {
               />
               <button
                 onClick={() => setShowIncome((prev) => !prev)}
-                className="flex items-center space-x-2 pl-4 text-blue-500 hover:underline"
+                className="flex items-center space-x-2 text-blue-500 hover:underline"
               >
                 <span>{showIncome ? "Hide Income" : "Show Income"}</span>
                 <FontAwesomeIcon
@@ -222,7 +218,7 @@ const Dashboard: React.FC = () => {
               />
               <button
                 onClick={() => setShowExpenses((prev) => !prev)}
-                className="flex items-center space-x-2 pl-4 text-blue-500 hover:underline"
+                className="flex items-center space-x-2 text-blue-500 hover:underline"
               >
                 <span>{showExpenses ? "Hide Expenses" : "Show Expenses"}</span>
                 <FontAwesomeIcon

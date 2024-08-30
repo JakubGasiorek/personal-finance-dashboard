@@ -5,8 +5,13 @@ import { Input } from "@/components/ui/input";
 import DatePicker from "react-datepicker";
 import PaginatedList from "@/components/PaginatedList";
 import { Transaction } from "@/types";
+import "react-datepicker/dist/react-datepicker.css";
 
-const ITEMS_PER_PAGE = 6;
+const getItemsPerPage = (width: number) => {
+  if (width > 1440) return 6;
+  if (width >= 1024) return 5;
+  return 3; // smaller screens
+};
 
 const TransactionHistory: React.FC = () => {
   const income = useSelector((state: RootState) => state.income.income);
@@ -18,6 +23,22 @@ const TransactionHistory: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [filter, setFilter] = useState<string>("");
+  const [itemsPerPage, setItemsPerPage] = useState<number>(
+    getItemsPerPage(window.innerWidth)
+  );
+
+  useEffect(() => {
+    // Function to update the items per page based on screen size
+    const handleResize = () => {
+      setItemsPerPage(getItemsPerPage(window.innerWidth));
+    };
+
+    // Add event listener for window resize
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup the event listener on component unmount
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     let filtered: Transaction[] = [...income, ...expenses];
@@ -52,38 +73,52 @@ const TransactionHistory: React.FC = () => {
   return (
     <div className="py-4 bg-dark-400 rounded-md w-full">
       <h2 className="text-xl mb-4">Transaction history</h2>
-      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2 mb-[1.7rem]">
+      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2 mb-8">
         <div>
-          <label className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label
+            htmlFor="start-date"
+            className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Start date
           </label>
           <div className="flex flex-col">
             <DatePicker
+              id="start-date"
               selected={startDate}
               onChange={(date) => setStartDate(date)}
               dateFormat="yyyy/MM/dd"
               className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              popperPlacement="bottom-start"
             />
           </div>
         </div>
         <div>
-          <label className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label
+            htmlFor="end-date"
+            className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             End date
           </label>
           <div className="flex flex-col">
             <DatePicker
+              id="end-date"
               selected={endDate}
               onChange={(date) => setEndDate(date)}
               dateFormat="yyyy/MM/dd"
               className="h-10 w-full rounded-md border border-dark-500 bg-dark-400 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              popperPlacement="bottom-start"
             />
           </div>
         </div>
         <div className="xl:col-span-1 col-span-2">
-          <label className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <label
+            htmlFor="filter-input"
+            className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Filter by name
           </label>
           <Input
+            id="filter-input"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Category/Source"
@@ -93,7 +128,7 @@ const TransactionHistory: React.FC = () => {
       </div>
       <PaginatedList
         items={filteredTransactions}
-        itemsPerPage={ITEMS_PER_PAGE}
+        itemsPerPage={itemsPerPage}
         renderItem={(transaction) => {
           const isIncome = "source" in transaction;
           const textColor = isIncome ? "text-green-500" : "text-red-500";
