@@ -23,15 +23,16 @@ const TransactionHistory: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [filter, setFilter] = useState<string>("");
-  const [itemsPerPage, setItemsPerPage] = useState<number>(
-    getItemsPerPage(window.innerWidth)
-  );
+  const [itemsPerPage, setItemsPerPage] = useState<number>(3); // Default to smallest screen size
 
   useEffect(() => {
-    // Function to update the items per page based on screen size
+    // This effect will only run on the client side
     const handleResize = () => {
       setItemsPerPage(getItemsPerPage(window.innerWidth));
     };
+
+    // Set initial value
+    handleResize();
 
     // Add event listener for window resize
     window.addEventListener("resize", handleResize);
@@ -41,6 +42,7 @@ const TransactionHistory: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Function to filter transactions
     let filtered: Transaction[] = [...income, ...expenses];
 
     if (startDate) {
