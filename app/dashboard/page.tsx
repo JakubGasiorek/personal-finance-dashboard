@@ -57,6 +57,14 @@ const Dashboard: React.FC = () => {
   const [showIncome, setShowIncome] = useState(true);
   const [showExpenses, setShowExpenses] = useState(true);
 
+  const [selectedMonth, setSelectedMonth] = useState<number | "all">(
+    new Date().getMonth() + 1
+  );
+
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+
   const router = useRouter();
 
   useEffect(() => {
@@ -122,11 +130,32 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  const totalIncome = income.reduce((acc, item) => acc + (item.amount || 0), 0);
-  const totalExpenses = expenses.reduce(
+  const filteredIncome = income.filter((item) => {
+    const date = new Date(item.date);
+    return selectedMonth === "all"
+      ? date.getFullYear() === selectedYear
+      : date.getMonth() + 1 === selectedMonth &&
+          date.getFullYear() === selectedYear;
+  });
+
+  const filteredExpenses = expenses.filter((item) => {
+    const date = new Date(item.date);
+    return selectedMonth === "all"
+      ? date.getFullYear() === selectedYear
+      : date.getMonth() + 1 === selectedMonth &&
+          date.getFullYear() === selectedYear;
+  });
+
+  const totalIncome = filteredIncome.reduce(
     (acc, item) => acc + (item.amount || 0),
     0
   );
+
+  const totalExpenses = filteredExpenses.reduce(
+    (acc, item) => acc + (item.amount || 0),
+    0
+  );
+
   const netBalance = totalIncome - totalExpenses;
 
   return (
@@ -142,6 +171,48 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-dark-400 p-4 rounded-md lg:col-span-1 md:col-span-2">
               <h2 className="text-xl mb-4">Summary</h2>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="month" className="hidden">
+                    Month
+                  </label>
+                  <select
+                    id="month"
+                    className="w-full p-2 bg-dark-300 rounded-md"
+                    value={selectedMonth}
+                    onChange={(e) =>
+                      setSelectedMonth(
+                        e.target.value === "all"
+                          ? "all"
+                          : parseInt(e.target.value)
+                      )
+                    }
+                  >
+                    <option value="all">Whole year</option>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {new Date(0, i).toLocaleString("en-US", {
+                          month: "long",
+                        })}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="year" className="hidden">
+                    Year
+                  </label>
+                  <input
+                    id="year"
+                    type="number"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                    className="w-full p-2 rounded-md bg-dark-300 text-white"
+                    min={2000}
+                    max={new Date().getFullYear()}
+                  />
+                </div>
+              </div>
               <div className="p-3 space-y-1 bg-dark-300 rounded-md text-lg">
                 <p>Total Income: ${totalIncome.toFixed(2)}</p>
                 <p>Total Expenses: ${totalExpenses.toFixed(2)}</p>
