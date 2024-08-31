@@ -94,22 +94,22 @@ const ExpenseChart: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center mb-4">
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-4 mb-4 w-full">
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(Number(e.target.value))}
-          className="p-2 bg-dark-300 text-white rounded"
+          className="p-2 bg-dark-300 text-white rounded w-full"
         >
           {Array.from({ length: 12 }, (_, i) => (
             <option key={i} value={i}>
-              {new Date(0, i).toLocaleString("default", { month: "long" })}
+              {new Date(0, i).toLocaleString("en-US", { month: "long" })}
             </option>
           ))}
         </select>
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="p-2 bg-dark-300 text-white rounded"
+          className="p-2 bg-dark-300 text-white rounded w-full"
         >
           {years.map((year) => (
             <option key={year} value={year}>
