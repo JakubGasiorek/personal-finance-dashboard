@@ -6,10 +6,11 @@ import DatePicker from "react-datepicker";
 import PaginatedList from "@/components/PaginatedList";
 import { Transaction } from "@/types";
 import "react-datepicker/dist/react-datepicker.css";
+import { Label } from "./ui/label";
 
 const getItemsPerPage = (width: number) => {
-  if (width > 1440) return 6;
-  if (width >= 1024) return 5;
+  if (width > 1440) return 5;
+  if (width >= 1024) return 4;
   return 3; // smaller screens
 };
 
@@ -69,20 +70,21 @@ const TransactionHistory: React.FC = () => {
       );
     }
 
+    filtered.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
     setFilteredTransactions(filtered);
   }, [startDate, endDate, filter, income, expenses]);
 
   return (
-    <div className="py-4 bg-dark-400 rounded-md w-full">
+    <div className="mt-4 bg-dark-400 rounded-md w-full">
       <h2 className="text-xl mb-4">Transaction history</h2>
-      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 mb-4">
         <div>
-          <label
-            htmlFor="start-date"
-            className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
+          <Label htmlFor="start-date" className="block mb-2">
             Start date
-          </label>
+          </Label>
           <div className="flex flex-col">
             <DatePicker
               id="start-date"
@@ -95,12 +97,9 @@ const TransactionHistory: React.FC = () => {
           </div>
         </div>
         <div>
-          <label
-            htmlFor="end-date"
-            className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
+          <Label htmlFor="end-date" className="block mb-2">
             End date
-          </label>
+          </Label>
           <div className="flex flex-col">
             <DatePicker
               id="end-date"
@@ -112,13 +111,10 @@ const TransactionHistory: React.FC = () => {
             />
           </div>
         </div>
-        <div className="xl:col-span-1 col-span-2">
-          <label
-            htmlFor="filter-input"
-            className="block mb-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
+        <div className="col-span-2">
+          <Label htmlFor="filter-input" className="block mb-2">
             Filter by name
-          </label>
+          </Label>
           <Input
             id="filter-input"
             value={filter}
@@ -138,18 +134,18 @@ const TransactionHistory: React.FC = () => {
           return (
             <div
               key={transaction.id}
-              className="p-2 bg-dark-300 rounded-md mb-2"
+              className="p-[0.82rem] bg-dark-300 rounded-md mb-2"
             >
               <div>
                 <strong className={`${textColor}`}>
                   {isIncome ? "Income" : "Expense"}
                 </strong>
               </div>
-              <div>{new Date(transaction.date).toLocaleDateString()}</div>
-              <div>Amount: ${transaction.amount.toFixed(2)}</div>
               <div className="truncate">
                 {isIncome ? transaction.source : transaction.category}
               </div>
+              <div>${transaction.amount.toFixed(2)}</div>
+              <div>{new Date(transaction.date).toLocaleDateString()}</div>
             </div>
           );
         }}
