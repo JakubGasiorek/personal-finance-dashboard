@@ -16,9 +16,7 @@ ChartJS.register(ArcElement, Tooltip, Title, Legend);
 
 const ExpenseChart: React.FC = () => {
   // State for selected month and year
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    new Date().getMonth()
-  );
+  const [selectedMonth, setSelectedMonth] = useState<number | "all">("all");
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
@@ -35,9 +33,10 @@ const ExpenseChart: React.FC = () => {
   // Filter data by the specified month and year
   const filteredData = expenseData.filter((expense) => {
     const date = new Date(expense.date);
-    return (
-      date.getMonth() === selectedMonth && date.getFullYear() === selectedYear
-    );
+    return selectedMonth === "all"
+      ? date.getFullYear() === selectedYear
+      : date.getMonth() === selectedMonth &&
+          date.getFullYear() === selectedYear;
   });
 
   // Aggregate filtered expense data by category
@@ -79,7 +78,14 @@ const ExpenseChart: React.FC = () => {
         callbacks: {
           label: function (tooltipItem: TooltipItem<"pie">) {
             const value = tooltipItem.raw as number;
-            return `Amount: $${value.toFixed(2)}`;
+            const total = tooltipItem.dataset.data.reduce(
+              (a, b) => Number(a) + Number(b),
+              0
+            );
+            const percentage = ((value / total) * 100).toFixed(2);
+            return `${tooltipItem.label}: $${value.toFixed(
+              2
+            )} (${percentage}%)`;
           },
         },
       },
@@ -97,9 +103,14 @@ const ExpenseChart: React.FC = () => {
       <div className="flex gap-4 mb-4 w-full">
         <select
           value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          onChange={(e) =>
+            setSelectedMonth(
+              e.target.value === "all" ? "all" : Number(e.target.value)
+            )
+          }
           className="p-2 bg-dark-300 text-white rounded w-full"
         >
+          <option value="all">Whole year</option>
           {Array.from({ length: 12 }, (_, i) => (
             <option key={i} value={i}>
               {new Date(0, i).toLocaleString("en-US", { month: "long" })}
