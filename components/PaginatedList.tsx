@@ -26,7 +26,7 @@ const PaginatedList = <T,>({
       <div className="flex-grow">
         <ul>{displayedItems.map(renderItem)}</ul>
       </div>
-      <div className="flex justify-between mt-4 items-center">
+      <div className="mt-4 flex justify-between items-center">
         <Button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -34,7 +34,7 @@ const PaginatedList = <T,>({
         >
           Previous
         </Button>
-        <span>
+        <span className="text-sm">
           Page {currentPage} of {totalPages}
         </span>
         <Button
