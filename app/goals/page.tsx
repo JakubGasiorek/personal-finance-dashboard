@@ -43,7 +43,7 @@ const Goals: React.FC = () => {
       dispatch(fetchGoals());
     }).catch((error) => {
       console.error("User is not authenticated:", error);
-      router.push("/");
+      router.push("/unauthorized");
     });
   }, [dispatch, router]);
 

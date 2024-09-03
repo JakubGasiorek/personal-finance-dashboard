@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
       dispatch(fetchExpense());
     }).catch((error) => {
       console.error("User is not authenticated:", error);
-      router.push("/"); // Redirect to login page if not authenticated
+      router.push("/unauthorized"); // Redirect if not authenticated
     });
   }, [dispatch, router]);
 
