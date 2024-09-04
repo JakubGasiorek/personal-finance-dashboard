@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SignInForm from "../components/forms/SignInForm";
 import SignUpForm from "../components/forms/SignUpForm";
 import { Button } from "@/components/ui/button";
+import { auth } from "@/services/firebase";
+import { useRouter } from "next/navigation";
 
 const Home = () => {
   const [isSigningIn, setIsSigningIn] = useState(true);
   const [signUpSuccess, setSignUpSuccess] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in, redirect to the dashboard
+        router.push("/dashboard");
+      }
+    });
+    return unsubscribe;
+  }, [router]);
 
   const toggleForm = () => {
     setIsSigningIn((prev) => !prev);
@@ -56,7 +69,9 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <p className="absolute bottom-4 text-gray-500 text-sm">© 2024 FinTrack</p>
+      <p className="absolute bottom-4 text-gray-500 text-sm">
+        © 2024 Jakub Gąsiorek
+      </p>
     </div>
   );
 };
