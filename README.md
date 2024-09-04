@@ -34,7 +34,7 @@ The Personal Finance Management Dashboard is a web application designed to help 
 ## Screenshots
 
 Here are some screenshots of the Personal Finance Management Dashboard:
-![Sign In Overview](./screenshots/sign-in-form.png)
+![Sign In Overview](./screenshots/sign-in-overview.png)
 _Sign In Overview_
 
 ![Dashboard Overview](./screenshots/dashboard-overview.png)
