@@ -29,7 +29,7 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, toggleSidebar, logout }) => {
         </li>
       </ul>
       <p className="absolute bottom-0 text-white p-4 copyright">
-        © 2024 FinTrack
+        © 2024 Jakub Gąsiorek
       </p>
     </div>
   );
