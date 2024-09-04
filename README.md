@@ -31,6 +31,18 @@ The Personal Finance Management Dashboard is a web application designed to help 
 
   - Fully responsive design ensuring the application works on various devices.
 
+## Screenshots
+
+Here are some screenshots of the Personal Finance Management Dashboard:
+![Sign In Overview](./screenshots/sign-in-form.png)
+_Sign In Overview_
+
+![Dashboard Overview](./screenshots/dashboard-overview.png)
+_Dashboard Overview_
+
+![Goal Tracking](./screenshots/goal-tracking.png)
+_Goal Tracking_
+
 ## Technologies Used
 
 - **React**: For building the user interface.
